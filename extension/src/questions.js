@@ -41,6 +41,18 @@
       answer: (d) => yesNo(d.deletion_request_mechanism),
     },
     {
+      // No question sentence to anchor on reliably, so the option text is the
+      // anchor; the answer is the full option label rather than Yes or No.
+      form: "app_access",
+      text: "All functionality in my app is available without any access restrictions",
+      answer: (d) =>
+        d.restricted === false
+          ? "All functionality in my app is available without any access restrictions"
+          : d.restricted === true
+            ? "All or some functionality in my app is restricted"
+            : null,
+    },
+    {
       form: "news_app",
       text: "Is your app a news app?",
       answer: (d) => yesNo(d.is_news_app),
@@ -79,7 +91,7 @@
       return { reason: `declarations.${question.form} is ${d.source || "missing a source"}` };
     }
     const label = question.answer(d);
-    if (!label) return { reason: `declarations.${question.form} has no yes/no answer for this question` };
+    if (!label) return { reason: `declarations.${question.form} has no answer for this question` };
     return { label };
   };
 })((globalThis.avow = globalThis.avow || {}));

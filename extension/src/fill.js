@@ -19,7 +19,8 @@
   };
 
   // The option whose label is the answer. Labels can carry a description
-  // after the word ("No  Your app does not..."), so the first word decides.
+  // after the answer ("No  Your app does not..."), so the answer must be the
+  // whole label or its leading words.
   avow.pickOption = (options, label) => {
     const want = avow.normalize(label);
     return options.find((o) => {
