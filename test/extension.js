@@ -4,6 +4,7 @@ import vm from "node:vm";
 import assert from "node:assert/strict";
 import { FORMS } from "../src/rules/completeness.js";
 import { DATA_TYPES, PURPOSES } from "../src/lib/play.js";
+import { imageSize } from "../src/lib/imagesize.js";
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -35,6 +36,32 @@ test("extension asks for no permissions and runs only on the Play Console", () =
     assert.equal(m[key], undefined, `manifest.json must not declare ${key}`);
   }
   assert.deepEqual(m.content_scripts.map((c) => c.matches).flat(), ["https://play.google.com/console/*"]);
+});
+
+// Chrome accepts 1 to 4 dot-separated integers, 0 to 65535, no leading zeros,
+// not all zero. "0.2.0-beta.1" is the classic rejected upload.
+const VERSION = /^(0|[1-9]\d{0,4})(\.(0|[1-9]\d{0,4})){0,3}$/;
+const validVersion = (v) =>
+  VERSION.test(v) && v.split(".").every((n) => Number(n) <= 65535) && v.split(".").some((n) => n !== "0");
+
+test("version format check accepts Chrome's format only", () => {
+  for (const v of ["0.1.0", "1", "0.2.0.1", "65535.0"]) assert.ok(validVersion(v), v);
+  for (const v of ["0.2.0-beta.1", "01.0", "0.0.0", "1.2.3.4.5", "70000"]) assert.ok(!validVersion(v), v);
+});
+
+test("extension manifest passes Web Store upload checks", () => {
+  const m = JSON.parse(readFileSync(join(EXT, "manifest.json"), "utf8"));
+  assert.ok(m.name && m.name.length <= 75, "name missing or over 75 characters");
+  assert.ok(m.description && m.description.length <= 132, "description missing or over 132 characters");
+  assert.ok(validVersion(m.version), `version "${m.version}" is not a valid Chrome version`);
+  for (const key of ["16", "32", "48", "128"]) assert.ok(m.icons?.[key], `icons.${key} missing`);
+  const icons = [...Object.entries(m.icons), ...Object.entries(m.action?.default_icon ?? {})];
+  for (const [size, rel] of icons) {
+    assert.ok(rel.endsWith(".png"), `${rel}: Chrome needs PNG icons`);
+    const s = imageSize(join(EXT, rel));
+    assert.ok(s, `${rel} is missing or not a PNG`);
+    assert.equal(`${s.width}x${s.height}`, `${size}x${size}`, `${rel} does not match its key ${size}`);
+  }
 });
 
 test("extension source never touches the network, storage or a submit", () => {
