@@ -100,6 +100,12 @@ plan and the reasoning behind each design call. The form order in
 `src/rules/completeness.js` was observed in the Console; Play does not publish
 it. No dependencies, Node 20+.
 
+## Browser extension
+
+`extension/` fills the yes/no Play Console declarations from the same
+manifest, outlines anything it left for you, and never saves. See
+`extension/README.md`.
+
 ## Not in scope yet
 
 Uploading. The Play Developer API covers bundles, listings and rollouts for

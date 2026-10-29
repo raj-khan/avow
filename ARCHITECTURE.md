@@ -44,7 +44,7 @@ manifest (JSON, in the app's repo)
           avow explain    the reasoning, on demand       DONE
           avow forms      the Console's screen order     DONE
           avow diff       declaration changes in review  DONE
-          extension       fill the forms in the browser  LATER
+          extension       fill the forms in the browser  STARTED
 ```
 
 The manifest is the durable artifact. Everything else is a consumer of it and
@@ -82,6 +82,8 @@ src/lib/git.js        file history and old revisions, via the git binary
 src/lib/diff.js       declaration changes between two manifests
 schema/*.json         JSON Schema for the manifest, enforced by the `schema` rule
 test/run.js           fake repos in temp dirs, no real build required
+extension/            MV3 content script: pick a manifest, fill yes/no questions
+test/extension.js     extension logic in a vm context, plus permission and network guards
 ```
 
 ### The rule contract
@@ -145,17 +147,13 @@ because an invariant guarding a number nobody reads is decoration.
 
 ### Later
 
-- **The Chrome extension.** MV3, content script on `play.google.com/console/*`.
-  Three non-negotiables, learned from watching the Console:
-  1. **Match on question text, not CSS selectors.** Google reshuffles that DOM
-     constantly but rarely rewrites the legal wording.
-  2. **Never auto-submit.** These are binding declarations. Fill, highlight
-     anything unmapped, let the human read and click.
-  3. **No credentials, no network.** The extension reads a local manifest file
-     the user picks. It must never hold a Google session or phone home, or it
-     becomes a credential-theft target sitting on the Play Console.
-  v2 section 9 adds a visible unmapped-fields panel, no state across sessions
-  and a schema version check.
+- **The Chrome extension: widen coverage.** The first version is in
+  `extension/` (see its README): no permissions, picks a manifest, fills seven
+  yes/no questions by their text, never saves, outlines what it left. Next:
+  confirm the question wording during a real submission and set
+  `QUESTIONS_OBSERVED`, then add the multi-option screens (App access, Target
+  audience, Data safety data types). The three non-negotiables still hold:
+  match on question text, never auto-submit, no credentials or network.
 - **App Store Connect.** The same problem exists on iOS: privacy nutrition
   labels, encryption export compliance, content rights, age rating. Larger
   surface, same shape. The manifest grows a `ios` section rather than forking.
