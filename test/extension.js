@@ -246,5 +246,36 @@ test("answerFor reads per-type answers from data_type_details", () => {
   assert.match(avow.answerFor(m, q, {}).reason, /could not tell which data type/);
 });
 
+const perType = (avow, text) => avow.QUESTIONS.find((x) => x.perType && x.text.includes(text));
+const crashManifest = (crash) => ({
+  declarations: { data_safety: { source: "answered", data_type_details: { "Crash logs": crash } } },
+});
+
+test("collected or shared ticks by leading label, unticking the other", () => {
+  const avow = load("questions.js", "fill.js");
+  const q = perType(avow, "collected, shared, or both");
+  const { labels } = avow.answerFor(crashManifest({ collected: true, shared: false }), q, { dataType: "Crash logs" });
+  const options = [
+    { label: "Collected  Data is transferred off the user's device" },
+    { label: "Shared  Data is transferred to a third party" },
+  ];
+  const plan = avow.planChecks(options, q, [...labels]);
+  assert.deepEqual([...plan.map((p) => p.want)], [true, false]);
+});
+
+test("ephemeral and required answer from the type's details", () => {
+  const avow = load("questions.js", "fill.js");
+  const m = crashManifest({ collected: true, ephemeral: true, required: false });
+  assert.equal(avow.answerFor(m, perType(avow, "ephemerally"), { dataType: "Crash logs" }).label, "Yes");
+  const required = perType(avow, "required for your app");
+  const label = avow.answerFor(m, required, { dataType: "Crash logs" }).label;
+  const options = [
+    { label: "Data collection is required (users can't turn off this data collection)" },
+    { label: "Users can choose whether this data is collected" },
+  ];
+  assert.equal(avow.pickOption(options, label), options[1]);
+  assert.equal(avow.matchQuestion("Is this data required for your app, or can users choose whether it\u2019s collected?"), required);
+});
+
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
 process.exit(failed ? 1 : 0);

@@ -44,14 +44,23 @@
   };
 
   // For a checkbox question: each on-screen option that is one of the
-  // question's own, and whether it should end up ticked. Labels must match
-  // exactly, because "Photos" must not tick "Photos and videos".
+  // question's own, and whether it should end up ticked. Labels match
+  // exactly, because "Photos" must not tick "Photos and videos". Questions
+  // marked prefix have descriptions after the label ("Collected  Data is
+  // transferred off..."), and none of their options is a prefix of another,
+  // so there the label only has to lead.
   avow.planChecks = (options, question, labels) => {
-    const own = new Set(question.options.map(avow.normalize));
+    const own = question.options.map(avow.normalize);
     const want = new Set(labels.map(avow.normalize));
+    const which = (label) => {
+      const l = avow.normalize(label);
+      if (own.includes(l)) return l;
+      return (question.prefix && own.find((o) => l.startsWith(`${o} `))) || null;
+    };
     return options
-      .filter((o) => own.has(avow.normalize(o.label)))
-      .map((o) => ({ option: o, want: want.has(avow.normalize(o.label)) }));
+      .map((o) => ({ option: o, key: which(o.label) }))
+      .filter((p) => p.key)
+      .map((p) => ({ option: p.option, key: p.key, want: want.has(p.key) }));
   };
 
   // What the panel lists after a fill. notSeen covers questions from a form
@@ -160,7 +169,7 @@
         continue;
       }
       const plan = avow.planChecks(options, question, answer.labels);
-      const seen = new Set(plan.map((p) => avow.normalize(p.option.label)));
+      const seen = new Set(plan.map((p) => p.key));
       const missing = answer.labels.filter((l) => !seen.has(avow.normalize(l)));
       for (const { option, want } of plan) if (isChecked(option.node) !== want) option.node.click();
       if (missing.length) {

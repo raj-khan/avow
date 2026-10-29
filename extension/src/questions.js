@@ -79,6 +79,37 @@
       options: avow.DATA_TYPES,
       answer: (d) => (Array.isArray(d.data_types) ? d.data_types : null),
     },
+    // Asked once per data type, on that type's screen. Answers come from
+    // data_type_details for whichever type the screen's heading names.
+    {
+      form: "data_safety",
+      perType: true,
+      kind: "checkboxes",
+      prefix: true,
+      text: "Is this data collected, shared, or both?",
+      options: ["Collected", "Shared"],
+      answer: (t) =>
+        typeof t.collected !== "boolean" && typeof t.shared !== "boolean"
+          ? null
+          : [t.collected && "Collected", t.shared && "Shared"].filter(Boolean),
+    },
+    {
+      form: "data_safety",
+      perType: true,
+      text: "Is this data processed ephemerally?",
+      answer: (t) => yesNo(t.ephemeral),
+    },
+    {
+      form: "data_safety",
+      perType: true,
+      text: "Is this data required for your app, or can users choose whether it's collected?",
+      answer: (t) =>
+        t.required === true
+          ? "Data collection is required"
+          : t.required === false
+            ? "Users can choose whether this data is collected"
+            : null,
+    },
     {
       // Checkbox questions name every option so the extension can untick
       // the ones the manifest excludes, and touches no checkbox outside them.
