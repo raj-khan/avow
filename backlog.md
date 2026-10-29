@@ -74,7 +74,7 @@ the report.
 | X12 | P1 | Code | Cap manifest file size (for example 1 MB) before `file.text()` in `panel.js` | done |
 | X13 | P1 | Code | `role="status"` on `#status` and `#result`, `role="alert"` on parse errors | done |
 | X14 | P1 | Code | Replace `li.jump` with `<button>`s that scroll to the question and focus its first control | done |
-| X15 | P1 | Code | Toggle gets `aria-expanded`, `aria-controls` and a label that switches between Collapse and Expand; Esc collapses the panel | todo |
+| X15 | P1 | Code | Toggle gets `aria-expanded`, `aria-controls` and a label that switches between Collapse and Expand; Esc collapses the panel | done |
 | X16 | P1 | Code | Collapse to a pill after a fill, and add a top-right dock toggle held in memory | todo |
 | X17 | P1 | Code | Language guard: if `document.documentElement.lang` is not `en*`, show "English Console only" instead of "no questions found" | todo |
 | X18 | P1 | Code | Add `extension/test-manifest.json` (sample) and reviewer test instructions in `extension/README.md` | todo |
