@@ -78,12 +78,16 @@ written and does not resolve `extends`.
 
 | Rule | Checks |
 | --- | --- |
-| `completeness` | every declaration Play asks for is present, and explained |
+| `schema` | the manifest matches `schema/manifest.schema.json` |
+| `completeness` | every declaration Play asks for is present, answered and explained |
 | `advertising-id` | the declaration against `AD_ID` in the **merged** manifest |
-| `data-safety` | "no collection" against installed analytics, crash, attribution and ad SDKs |
-| `listing-limits` | copy against Play's character caps |
+| `permissions-inventory` | every merged permission is listed under `permissions`, with the library that added it |
+| `data-safety` | "no collection" against analytics, crash, attribution and ad SDKs in `package.json` and Gradle |
+| `content-rating` | each IARC answer has a note, and the issued rating is recorded and dated |
+| `listing-limits` | copy against Play's character caps; emoji, URLs and rankings in the title |
 | `assets` | icon, feature graphic and screenshot dimensions, bytes, aspect ratio and count |
 | `claims` | numbers in the listing against the data file the app ships |
+| `stale-declarations` | dependency or data files changed in git after the answer was dated |
 
 Permissions are read from the merged release manifest, not from the authored
 `AndroidManifest.xml` or `app.json`, because libraries and config plugins add
