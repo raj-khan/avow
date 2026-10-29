@@ -39,7 +39,7 @@
       --bg: #fff; --fg: #1f1f24; --muted: #5f6368; --line: #dadce0;
       --accent: #3b2f8f; --on-accent: #fff; --focus: #3b2f8f;
       --warn: #a04b00; --error: #b3261e;
-      position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 340px;
+      position: fixed; right: 16px; bottom: 16px; width: 340px;
       max-height: 60vh; overflow: auto; font: 13px/1.45 system-ui, sans-serif; color: var(--fg);
       background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, .18); color-scheme: light dark;
@@ -287,5 +287,17 @@
     $("result").append(h, ul);
   }
 
+  // The host is a manual popover, so the browser puts it in the top layer
+  // above anything the Console stacks, with no z-index race. Its own box is
+  // reset to nothing; the fixed .panel inside does the positioning. Browsers
+  // without popovers fall back to a very high z-index.
+  host.style.cssText = "all: initial; position: fixed; inset: auto; width: 0; height: 0; " +
+    "margin: 0; padding: 0; border: 0; overflow: visible; background: transparent;";
   document.body.append(host);
+  if (typeof host.showPopover === "function") {
+    host.setAttribute("popover", "manual");
+    host.showPopover();
+  } else {
+    host.style.zIndex = "2147483647";
+  }
 })((globalThis.avow = globalThis.avow || {}));
