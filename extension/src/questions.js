@@ -53,6 +53,16 @@
             : null,
     },
     {
+      // Checkbox questions name every option so the extension can untick
+      // the ones the manifest excludes, and touches no checkbox outside them.
+      // The anchor is a set of option labels that only this screen shows.
+      form: "target_audience",
+      kind: "checkboxes",
+      anchor: ["5 and under", "18 and over"],
+      options: ["5 and under", "6-8", "9-12", "13-15", "16-17", "18 and over"],
+      answer: (d) => (Array.isArray(d.age_groups) ? d.age_groups : null),
+    },
+    {
       form: "news_app",
       text: "Is your app a news app?",
       answer: (d) => yesNo(d.is_news_app),
@@ -74,11 +84,15 @@
       .replace(/\s+/g, " ")
       .trim();
 
-  // The question whose wording appears in this text, or null. Console labels
-  // often carry help text after the question, so containment, not equality.
+  // Whether normalized text shows this question: its sentence, or every one
+  // of its anchor labels. Console labels often carry help text after the
+  // question, so containment, not equality.
+  avow.shows = (q, t) =>
+    q.text ? t.includes(avow.normalize(q.text)) : q.anchor.every((a) => t.includes(avow.normalize(a)));
+
   avow.matchQuestion = (text) => {
     const t = avow.normalize(text);
-    return avow.QUESTIONS.find((q) => t.includes(avow.normalize(q.text))) || null;
+    return avow.QUESTIONS.find((q) => avow.shows(q, t)) || null;
   };
 
   // The option label to select, or a reason it cannot be filled. Only
@@ -90,8 +104,14 @@
     if (d.source !== "answered" && d.source !== "planned") {
       return { reason: `declarations.${question.form} is ${d.source || "missing a source"}` };
     }
-    const label = question.answer(d);
-    if (!label) return { reason: `declarations.${question.form} has no answer for this question` };
-    return { label };
+    const value = question.answer(d);
+    if (!value) return { reason: `declarations.${question.form} has no answer for this question` };
+    if (question.kind !== "checkboxes") return { label: value };
+    const known = new Set(question.options.map(avow.normalize));
+    const strange = value.filter((v) => !known.has(avow.normalize(v)));
+    if (strange.length) {
+      return { reason: `declarations.${question.form} lists ${strange.map((v) => `"${v}"`).join(", ")}, not an option on this screen` };
+    }
+    return { labels: value };
   };
 })((globalThis.avow = globalThis.avow || {}));

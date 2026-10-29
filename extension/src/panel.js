@@ -80,16 +80,16 @@
     const { filled, unfilled, unknown, notSeen } = avow.summarize(report);
     $("result").replaceChildren();
     if (!report.length) {
-      $("result").textContent = "No yes/no questions found on this page.";
+      $("result").textContent = "No questions avow knows were found on this page.";
       return;
     }
     const line = document.createElement("p");
     line.textContent = `Filled ${filled.length}. Everything outlined yellow is yours to answer. ` +
       "Review the page, then save in the Console.";
     $("result").append(line);
-    section("Left for you", unfilled.map((r) => [r.question.text, r.reason, r.block]));
+    section("Left for you", unfilled.map((r) => [r.question.text || r.question.form, r.reason, r.block]));
     section("Not in avow's question list", unknown.map((r) => [r.text, "", r.block]));
-    section("Not seen on this page", notSeen.map((q) => [q.text, "may be on the next step of this form"]));
+    section("Not seen on this page", notSeen.map((q) => [q.text || q.anchor.join(", "), "may be on the next step of this form"]));
   });
 
   function section(title, items) {

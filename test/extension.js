@@ -173,5 +173,28 @@ test("app access is answered by option text", () => {
   assert.equal(avow.pickOption(options, label(true)), options[1]);
 });
 
+test("target audience is a checkbox question located by its option labels", () => {
+  const avow = load("questions.js", "fill.js");
+  const page = tree("Target age 5 and under 6-8 9-12 13-15 16-17 18 and over", "13-15");
+  assert.equal(avow.locate(page, access).question.form, "target_audience");
+});
+
+test("answerFor returns checkbox labels and rejects values that are not options", () => {
+  const avow = load("questions.js");
+  const q = avow.QUESTIONS.find((x) => x.form === "target_audience");
+  const m = (age_groups) => ({ declarations: { target_audience: { source: "answered", age_groups } } });
+  assert.deepEqual([...avow.answerFor(m(["13-15", "18 and over"]), q).labels], ["13-15", "18 and over"]);
+  assert.match(avow.answerFor(m(["teens"]), q).reason, /"teens", not an option/);
+});
+
+test("planChecks ticks listed options, unticks the rest, ignores foreign boxes", () => {
+  const avow = load("questions.js", "fill.js");
+  const q = avow.QUESTIONS.find((x) => x.form === "target_audience");
+  const options = ["6-8", "13-15", "18 and over", "I agree to the terms"].map((label) => ({ label }));
+  const plan = avow.planChecks(options, q, ["13-15", "18 and over"]);
+  assert.deepEqual([...plan.map((p) => [p.option.label, p.want])].map((x) => [...x]),
+    [["6-8", false], ["13-15", true], ["18 and over", true]]);
+});
+
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
 process.exit(failed ? 1 : 0);
