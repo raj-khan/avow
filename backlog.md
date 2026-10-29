@@ -39,7 +39,7 @@ tests. Plain MV3, no build step, no dependencies.
 | E2 | Question-text matching: map manifest answers to Console question wording | done |
 | E3 | Fill and highlight: tick the matching option, green; never submit | done |
 | E4 | Unmapped panel: questions on screen with no answer, answers with no question on screen | done |
-| E5 | Docs: load-unpacked instructions, ARCHITECTURE.md | todo |
+| E5 | Docs: load-unpacked instructions, ARCHITECTURE.md | done |
 
 ## Deliberately not taken from v2
 
