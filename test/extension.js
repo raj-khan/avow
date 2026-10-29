@@ -5,6 +5,7 @@ import assert from "node:assert/strict";
 import { FORMS } from "../src/rules/completeness.js";
 import { DATA_TYPES, PURPOSES } from "../src/lib/play.js";
 import { imageSize } from "../src/lib/imagesize.js";
+import { byId } from "../src/rules/index.js";
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -346,6 +347,27 @@ test("languageNote stays quiet for English and explains anything else", () => {
   const avow = load("questions.js");
   for (const lang of ["", "en", "en-US", "EN-gb", undefined]) assert.equal(avow.languageNote(lang), null);
   assert.match(avow.languageNote("de"), /"de".*English/);
+});
+
+test("the sample manifest loads cleanly and answers every question", () => {
+  const avow = load("load.js", "questions.js");
+  const { manifest, warnings } = avow.readManifest(readFileSync(join(EXT, "test-manifest.json"), "utf8"));
+  assert.equal(warnings.length, 0);
+  for (const q of avow.QUESTIONS) {
+    const context = q.perType ? { dataType: "Crash logs" } : {};
+    const a = avow.answerFor(manifest, q, context);
+    // The sharing purposes question only shows for shared types; Crash logs is not shared.
+    if (q.text === "Why is this user data shared?") continue;
+    assert.ok(a.label || a.labels, `${q.text || q.form}: ${a.reason}`);
+  }
+});
+
+test("the sample manifest passes the CLI's schema and data safety rules", () => {
+  const m = JSON.parse(readFileSync(join(EXT, "test-manifest.json"), "utf8"));
+  for (const id of ["schema", "data-types", "data-type-details"]) {
+    const r = byId.get(id).verify(m, EXT);
+    assert.equal(r.status, "pass", `${id}: ${r.message} ${[].concat(r.detail ?? []).join("; ")}`);
+  }
 });
 
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);

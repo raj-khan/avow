@@ -1,0 +1,33 @@
+{
+  "$comment": "Sample manifest for trying the extension and for Chrome Web Store reviewers. Not a real app, and it covers only the screens the extension fills, so avow check reports the rest as missing.",
+  "schema": 1,
+  "updated": "2026-10-29",
+  "app": { "package": "com.example.avowdemo", "version_name": "1.0.0", "version_code": 1 },
+  "declarations": {
+    "app_access": { "source": "answered", "restricted": false, "why": "No login; every screen is reachable without an account." },
+    "ads": { "source": "answered", "contains_ads": false, "why": "No ads SDK is installed." },
+    "advertising_id": { "source": "answered", "uses_advertising_id": false, "why": "AD_ID is absent from the merged release manifest." },
+    "target_audience": {
+      "source": "answered",
+      "age_groups": ["13-15", "16-17", "18 and over"],
+      "why": "General-audience utility; under-13 groups left unticked to stay out of the Families programme."
+    },
+    "data_safety": {
+      "source": "answered",
+      "collects_user_data": true,
+      "shares_user_data": false,
+      "encrypted_in_transit": true,
+      "deletion_request_mechanism": false,
+      "data_types": ["Crash logs"],
+      "data_type_details": {
+        "Crash logs": {
+          "collected": true, "shared": false, "ephemeral": false, "required": true,
+          "collection_purposes": ["Analytics"]
+        }
+      },
+      "why": "Crash reports only, sent over HTTPS to our own endpoint."
+    },
+    "news_app": { "source": "answered", "is_news_app": false, "why": "Not a news app." },
+    "government_app": { "source": "answered", "is_government_app": false, "why": "Not developed for a government." }
+  }
+}

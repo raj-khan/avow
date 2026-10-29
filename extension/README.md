@@ -30,6 +30,32 @@ Bump `version` in `manifest.json` for every upload.
    question (dashed outline).
 4. Read the page and save it yourself.
 
+## Try it, or review it, without an app of your own
+
+`test-manifest.json` is a sample manifest for a made-up app. It exercises
+every screen the extension fills.
+
+1. Load the extension unpacked (above), or install the store build.
+2. Open any Play Console app page, for example App content > Ads. Changes
+   are not saved unless you click Save, so this is safe on a real account.
+3. In the avow panel, **Pick manifest** and choose `test-manifest.json`.
+4. **Fill this page**. For the Ads screen, "No" is selected and outlined
+   green, and the panel reports "Filled 1".
+5. Leave the page without saving, or save if the answers are right for you.
+
+What each screen gets from the sample:
+
+| Screen | Filled with |
+| --- | --- |
+| App access | All functionality available without restrictions |
+| Ads, Advertising ID, News app, Government app | No |
+| Target audience | 13-15, 16-17, 18 and over |
+| Data safety, first step | Collects: Yes; encrypted in transit: Yes; deletion requests: No |
+| Data safety, data types | Crash logs only |
+| Data safety, Crash logs | Collected; not ephemeral; required; purpose Analytics |
+
+The extension never clicks Save or Submit, and makes no network requests.
+
 ## What it will never do
 
 - **Submit or save.** It clicks radio options and checkboxes that belong to
