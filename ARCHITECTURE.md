@@ -43,8 +43,8 @@ manifest (JSON, in the app's repo)
           avow check      verify against the repo        DONE
           avow explain    the reasoning, on demand       DONE
           avow forms      the Console's screen order     DONE
-          extension             fill the forms in the browser  LATER
-          avow api        push what the API can take     MAYBE
+          avow diff       declaration changes in review  DONE
+          extension       fill the forms in the browser  LATER
 ```
 
 The manifest is the durable artifact. Everything else is a consumer of it and
@@ -73,10 +73,14 @@ code, and the browser layer is a thin delivery mechanism added last.
 src/cli.js            argument parsing, rule dispatch, exit codes
 src/rules/index.js    the registry; array order is display order
 src/rules/*.js        one rule per concern, each self-describing
-src/lib/report.js     result/status vocabulary and the terminal renderer
-src/lib/android.js    merged-manifest discovery, permissions, dependencies
+src/lib/report.js     status vocabulary, terminal and GitHub renderers
+src/lib/android.js    merged manifest, permissions and their libraries, dependencies
 src/lib/imagesize.js  PNG IHDR and JPEG SOF parsing, no image library
-schema/*.json         JSON Schema for the manifest (documentation today)
+src/lib/schema.js     the JSON Schema subset the manifest schema uses
+src/lib/manifest.js   loading, with `extends` resolved
+src/lib/git.js        file history and old revisions, via the git binary
+src/lib/diff.js       declaration changes between two manifests
+schema/*.json         JSON Schema for the manifest, enforced by the `schema` rule
 test/run.js           fake repos in temp dirs, no real build required
 ```
 
@@ -88,7 +92,7 @@ export default {
   question: "Does your app use advertising ID?",
   console_path: "App content > Advertising ID",
   why: "...what Play does with the answer and how it goes wrong...",
-  verify(manifest, root) { return result(PASS|FAIL|WARN|SKIP, id, msg, detail?); },
+  verify(manifest, root, { release, today }) { return result(PASS|FAIL|WARN|SKIP, id, msg, detail?); },
 };
 ```
 
@@ -110,32 +114,34 @@ rather than trusting the declaration.
 
 | Rule | What it proves |
 | --- | --- |
-| `completeness` | every Console declaration is present, and explained |
-| `advertising-id` | the answer against `AD_ID` in the **merged** manifest |
-| `data-safety` | "no collection" against installed analytics/crash/attribution/ad SDKs |
-| `listing-limits` | copy against Play's character caps |
+| `schema` | the manifest has the shape every other rule reads |
+| `completeness` | every Console declaration is present, answered and explained |
+| `advertising-id` | the answer against `AD_ID` in the **merged** manifest, naming the library |
+| `permissions-inventory` | every merged permission is accounted for, with its library |
+| `data-safety` | "no collection" against analytics/crash/attribution/ad SDKs in npm and Gradle |
+| `content-rating` | each IARC answer has a reason; the issued rating is recorded and dated |
+| `listing-limits` | copy against Play's character caps; title against the metadata policy |
 | `assets` | icon, feature graphic, screenshot dimensions, bytes, ratio, count |
 | `claims` | numbers in the listing against the data file the app ships |
+| `stale-declarations` | no dependency or data change in git history since the answer was given |
+
+`source` on each declaration is `answered`, `planned`, `inherited`,
+`unanswered` or `n/a`. `unanswered` fails; `planned` and `inherited` warn, and
+fail under `check --release`, where the manifest must match the Console.
 
 `claims` additionally fails when a pinned number appears nowhere in the copy,
 because an invariant guarding a number nobody reads is decoration.
 
 ## 5. Roadmap
 
-### Next
+### Done (v2 build plan, see `backlog.md`)
 
-- **Schema validation in `check`.** The schema exists but nothing enforces it.
-  Needs a small hand-rolled validator, since a dependency is not worth it for
-  one document shape.
-- **`avow diff`.** Compare the manifest against the previous git revision
-  and list which declarations changed. A changed Data safety answer should be
-  loud in review; today it is one line in a diff nobody reads closely.
-- **Permission inventory rule.** Report every permission in the merged manifest
-  that the manifest does not account for, with the library that contributed it.
-  This generalises `advertising-id` into the check developers actually want:
-  "what is my bundle asking for, and why".
-- **`--format github`.** Emit GitHub Actions annotations so failures land on the
-  diff rather than in a log.
+- Schema validation in `check`, with a hand-rolled validator.
+- `avow diff`: declaration and permission changes against a git revision.
+- `permissions-inventory`, with library attribution from the merger report.
+- `content-rating` and `stale-declarations`.
+- `--release`, `--format github`, dated `FORMS`.
+- `extends` for a shared baseline manifest.
 
 ### Later
 
@@ -148,23 +154,25 @@ because an invariant guarding a number nobody reads is decoration.
   3. **No credentials, no network.** The extension reads a local manifest file
      the user picks. It must never hold a Google session or phone home, or it
      becomes a credential-theft target sitting on the Play Console.
+  v2 section 9 adds a visible unmapped-fields panel, no state across sessions
+  and a schema version check.
 - **App Store Connect.** The same problem exists on iOS: privacy nutrition
   labels, encryption export compliance, content rights, age rating. Larger
   surface, same shape. The manifest grows a `ios` section rather than forking.
-- **Multi-app.** An app factory wants one shared policy baseline plus per-app
-  overrides. Needs a manifest `extends` key and nothing else architecturally.
+- **Cross-app drift.** With `extends` in place, report where app manifests
+  diverge from their baseline. Waits on the factory interviews (v2 section 3).
 
 ### Maybe
 
-- **Push the machine-fillable parts.** The Play Developer API covers listing
-  text, graphics and release notes. The manifest already holds all of it, so
-  `avow push` is mostly plumbing. Deliberately deprioritised: `eas
-  submit` already does this for anyone on Expo, and competing with it is not
-  the point.
 - **Hosted.** A dashboard that watches repos and warns when a dependency
-  invalidates a filed declaration. This is the only version with recurring
-  revenue, and also the only one needing a server, auth and someone's repo
+  invalidates a filed declaration. It needs a server, auth and someone's repo
   access. Do not start here.
+
+### Dropped
+
+- **Pushing the machine-fillable parts** through the Play Developer API. `eas
+  submit` already does it, and competing with it is not the point (v2
+  section 12).
 
 ## 6. Who this is for
 
@@ -195,22 +203,29 @@ The `why` field and `source: "answered"` are already that artifact.
   token. It reads files. This keeps it safe to run in CI and safe to install.
 - **`quran-radio` is a fixture, not a tenant.** Nothing app-specific belongs in
   the rules.
+- **Git is called, not imported.** `stale-declarations` and `diff` shell out to
+  the `git` binary with `execFileSync`. Every CI checkout has it, and a JS git
+  library would be the dependency this repo refuses. No git means `skip`.
 
 ## 8. Open questions
 
-- Should `check` hard-fail on a declaration with `source: "planned"` when run
-  with a `--release` flag? Probably, but the flag's semantics need thought.
-- Content rating is a long questionnaire whose answers are mostly unverifiable
-  from code. Is recording them with reasoning enough, or is there a useful
-  check hiding in there?
-- Play changes these forms without notice. There is no feed to watch. The
-  honest answer may be that `FORMS` is versioned by observation and dated, and
-  the tool says how old its knowledge is.
+v1's three are answered: `--release` fails `planned` and `inherited`;
+`content-rating` checks the record rather than the answers; `FORMS` is dated
+and `check` prints its age. v2's open questions (section 13) stand, chiefly
+whether the factory customer exists in enough numbers.
 
 ## 9. Provenance
 
 `FORMS` in `src/rules/completeness.js` is the screen order observed during the
 Quran Radio 1.0.0 submission on 2026-10-27, not documentation: Play does not
-publish the order. The `why` on each rule is the reasoning worked out while
+publish the order. `FORMS_OBSERVED` records that date, and `check` warns once
+it is over 90 days old.
+
+The observation ritual, on every real submission:
+
+1. Open `FORMS` before starting.
+2. Note any screen that is new, renamed or reordered.
+3. Update `FORMS` and `FORMS_OBSERVED`.
+4. Commit as `Update FORMS observed YYYY-MM-DD during <app> submission`. The `why` on each rule is the reasoning worked out while
 answering it for real. That is the asset here, and it only stays accurate if
 future submissions are recorded the same way.

@@ -59,7 +59,7 @@ rule.
 
 1. New file in `src/rules/`, default-export an object with `id`, `question`,
    `console_path`, `why` (over 40 characters; a test asserts this) and
-   `verify(manifest, root)`.
+   `verify(manifest, root, { release, today })`.
 2. `verify` returns `result(status, id, message, detail?)` from `lib/report.js`
    and must return `SKIP` rather than guess when the input it needs is absent.
 3. Register it in `src/rules/index.js`. Order there is display order.
