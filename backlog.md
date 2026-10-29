@@ -89,7 +89,7 @@ the report.
 | X27 | P2 | Code | Undo: snapshot each touched control's prior state before a fill and offer "Undo fill" through the same click path | done |
 | X28 | P2 | Code | Show the panel host with `popover="manual"` and `showPopover()`, and drop the `z-index` hack | done |
 | X29 | P2 | Code | Opt-in E2E script (`test/e2e.js`, Node 22+, not in `npm test`): Chrome for Testing in new headless mode, CDP `Fetch` serving fixtures under `https://play.google.com/console/`, built-in `WebSocket` | done |
-| X30 | P2 | Code | `extension/CHANGELOG.md` kept out of the zip; the pack script refuses a version with no changelog heading; tag releases `ext-v*` | todo |
+| X30 | P2 | Code | `extension/CHANGELOG.md` kept out of the zip; the pack script refuses a version with no changelog heading; tag releases `ext-v*` | done |
 | X31 | P3 | Manual | Verify a site in Search Console for the verified-publisher link | todo |
 | X32 | P3 | Code | Move to `chrome.sidePanel` (needs `action`, a panel script and messaging) | todo |
 | X33 | P3 | Code | Structure-based matching (control attributes, order within known sections), then `_locales` for avow's own strings | todo |
