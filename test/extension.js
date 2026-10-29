@@ -2,6 +2,7 @@ import { readFileSync, readdirSync } from "node:fs";
 import { join } from "node:path";
 import vm from "node:vm";
 import assert from "node:assert/strict";
+import { FORMS } from "../src/rules/completeness.js";
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -63,6 +64,45 @@ test("readManifest rejects invalid JSON and non-manifests", () => {
   assert.throws(() => avow.readManifest("{"), /Not valid JSON/);
   assert.throws(() => avow.readManifest("[]"), /expected a JSON object/);
   assert.throws(() => avow.readManifest('{"schema":1}'), /no declarations/);
+});
+
+test("matchQuestion ignores case, punctuation, quotes and trailing help text", () => {
+  const avow = load("questions.js");
+  assert.equal(avow.matchQuestion("Does your app use advertising ID?").form, "advertising_id");
+  assert.equal(avow.matchQuestion("  DOES YOUR APP CONTAIN ADS  Learn more").form, "ads");
+  assert.equal(avow.matchQuestion("Is your app a \u201cnews\u201d app?").form, "news_app");
+  assert.equal(avow.matchQuestion("Does your app use location?"), null);
+});
+
+test("answerFor maps declarations to Yes or No", () => {
+  const avow = load("questions.js");
+  const q = (form, text) => avow.QUESTIONS.find((x) => x.form === form && (!text || x.text.includes(text)));
+  const m = {
+    declarations: {
+      advertising_id: { source: "answered", uses_advertising_id: false },
+      data_safety: { source: "planned", collects_user_data: false, shares_user_data: true, encrypted_in_transit: "n/a" },
+    },
+  };
+  assert.deepEqual({ ...avow.answerFor(m, q("advertising_id")) }, { label: "No" });
+  assert.deepEqual({ ...avow.answerFor(m, q("data_safety", "collect or share")) }, { label: "Yes" });
+  assert.match(avow.answerFor(m, q("data_safety", "encrypted")).reason, /no yes\/no answer/);
+  assert.match(avow.answerFor(m, q("ads")).reason, /not in the manifest/);
+});
+
+test("answerFor refuses inherited and unanswered declarations", () => {
+  const avow = load("questions.js");
+  const ads = avow.QUESTIONS.find((x) => x.form === "ads");
+  for (const source of ["inherited", "unanswered"]) {
+    const r = avow.answerFor({ declarations: { ads: { source, contains_ads: false } } }, ads);
+    assert.equal(r.label, undefined);
+    assert.match(r.reason, new RegExp(source));
+  }
+});
+
+test("every question maps to a form the CLI knows", () => {
+  const avow = load("questions.js");
+  const known = new Set(FORMS.map(([k]) => k));
+  for (const q of avow.QUESTIONS) assert.ok(known.has(q.form), `${q.form} is not in FORMS`);
 });
 
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
