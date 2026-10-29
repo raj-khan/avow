@@ -7,6 +7,7 @@
   "engines": { "node": ">=20" },
   "scripts": {
     "test": "node test/run.js && node test/extension.js",
+    "test:e2e": "node test/e2e.js",
     "pack:extension": "scripts/pack-extension.sh"
   },
   "license": "MIT",
