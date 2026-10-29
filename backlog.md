@@ -79,7 +79,7 @@ the report.
 | X17 | P1 | Code | Language guard: if `document.documentElement.lang` is not `en*`, show "English Console only" instead of "no questions found" | done |
 | X18 | P1 | Code | Add `extension/test-manifest.json` (sample) and reviewer test instructions in `extension/README.md` | done |
 | X19 | P1 | Manual | Capture 3 screenshots at 1280x800 from a demo app with account details hidden, and make a 440x280 promo tile with no text | todo |
-| X20 | P1 | Manual | Write the listing: name "avow", summary with "for Google Play Console™", trust lines (no permissions, no network, nothing stored, never submits), "Not affiliated with Google", attribution line, category Developer Tools, support URL to GitHub issues | todo |
+| X20 | P1 | Manual | Write the listing: name "avow", summary with "for Google Play Console™", trust lines (one no-warning permission, no network, nothing stored, never submits), "Not affiliated with Google", attribution line, category Developer Tools, support URL to GitHub issues | todo |
 | X21 | P1 | Manual | Test-install the packed CRX and record the exact install warning text; record a short demo video | todo |
 | X22 | P2 | Code | Swap green and yellow for a colorblind-safe pair, and add a small visible text tag to each marked block | done |
 | X23 | P2 | Code | Move colors to CSS custom properties with a `prefers-color-scheme: dark` block; in `forced-colors`, replace `box-shadow` with a `CanvasText` border; give the panel its own accent | done |
@@ -91,11 +91,11 @@ the report.
 | X29 | P2 | Code | Opt-in E2E script (`test/e2e.js`, Node 22+, not in `npm test`): Chrome for Testing in new headless mode, CDP `Fetch` serving fixtures under `https://play.google.com/console/`, built-in `WebSocket` | done |
 | X30 | P2 | Code | `extension/CHANGELOG.md` kept out of the zip; the pack script refuses a version with no changelog heading; tag releases `ext-v*` | done |
 | X31 | P3 | Manual | Verify a site in Search Console for the verified-publisher link | todo |
-| X32 | P3 | Code | Move to `chrome.sidePanel` (needs `action`, a panel script and messaging) | todo |
+| X32 | P3 | Code | Move to `chrome.sidePanel` (needs `action`, a panel script and messaging) | done (X32a to X32d) |
 | X32a | P3 | Code | Shared actions (load, fill, jump, undo) returning plain data, used by every surface | done |
 | X32b | P3 | Code | Content-script bridge: side panel talks to the page over a port; in-page panel hides while attached | done |
 | X32c | P3 | Code | Side panel page, `sidePanel` permission, service worker that opens it from the toolbar; tests and e2e | done |
-| X32d | P3 | Code | Docs: PRIVACY.md, READMEs, CHANGELOG 0.2.0, version bump | todo |
+| X32d | P3 | Code | Docs: PRIVACY.md, READMEs, CHANGELOG 0.2.0, version bump | done |
 | X33 | P3 | Code | Structure-based matching (control attributes, order within known sections), then `_locales` for avow's own strings | todo |
 | X34 | P3 | Code | Set `minimum_chrome_version` | done: not needed, guarded by a test |
 

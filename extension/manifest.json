@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "avow",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Fills Play Console declarations from an avow manifest you pick. Never submits, never connects anywhere.",
   "icons": {
     "16": "icons/icon16.png",

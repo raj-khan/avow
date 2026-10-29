@@ -9,6 +9,7 @@ pick. It does not decide anything: the answers come from the manifest, which
 1. Open `chrome://extensions` and turn on **Developer mode**.
 2. **Load unpacked** and choose this `extension/` folder.
 3. Open a Play Console page such as App content > Ads.
+4. Optional: pin avow to the toolbar. Its button opens the side panel.
 
 ## Test
 
@@ -21,7 +22,8 @@ npm run test:e2e   # opt-in: real Chrome, real extension, real Console URL
 to pick one). It loads the unpacked extension into a throwaway headless
 profile over the DevTools pipe, serves `test/fixtures/console-ads.html` at a
 `https://play.google.com/console/...` URL, and checks that the content script
-injects there and that Fill sets the controls. It is not part of `npm test`
+injects there and that Fill sets the controls, both from the in-page panel
+and from the side panel page through the bridge. It is not part of `npm test`
 because CI has no Chrome.
 
 ## Package for the Chrome Web Store
@@ -30,14 +32,20 @@ because CI has no Chrome.
 npm run pack:extension   # dist/avow-extension-<version>.zip
 ```
 
-The zip holds only `manifest.json`, `src/` and the PNG icons, from the last
+The zip holds only `manifest.json`, `sidepanel.html`, `src/` and the PNG icons, from the last
 commit; the script refuses to run with uncommitted changes in `extension/`.
 Bump `version` in `manifest.json` for every upload.
 
 ## Use
 
-1. In the avow panel (bottom right), **Pick manifest** and choose your
-   `store/release-manifest.json`.
+There are two ways in, with the same controls:
+
+- **In-page panel** (bottom right of every Console page, no setup).
+- **Side panel**: click avow's toolbar button. It sits beside the Console
+  instead of over it, keeps your manifest while you move between tabs and
+  reload, and the in-page panel steps aside while it is open.
+
+1. **Pick manifest** and choose your `store/release-manifest.json`.
 2. **Fill this page**. Recognised questions are ticked and outlined blue.
 3. Anything outlined orange is yours: either the manifest has no usable answer
    (the reason is in the tooltip and the panel), or avow does not know the
@@ -74,10 +82,12 @@ The extension never clicks Save or Submit, and makes no network requests.
 
 - **Submit or save.** It clicks radio options and checkboxes that belong to
   a question it knows, and nothing else.
-- **Touch the network or your session.** No permissions, no background
-  worker, no storage. `test/extension.js` fails the build if any of that
-  appears in the source.
-- **Remember the manifest.** It lives in memory until you leave the page.
+- **Touch the network or your session.** One permission, `sidePanel`, which
+  shows no install warning. The service worker only makes the toolbar button
+  open the side panel. No storage. `test/extension.js` fails the build if any
+  other permission or Chrome API appears.
+- **Remember the manifest.** It lives in memory until you leave the page, or
+  close the side panel.
 - **Fill `inherited` or `unanswered` declarations.** Only `answered` and
   `planned` ones.
 
