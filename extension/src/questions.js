@@ -53,6 +53,29 @@
             : null,
     },
     {
+      // The data types step. Category headings (Location, Personal info...)
+      // are not options, so they are never ticked or unticked.
+      form: "data_safety",
+      kind: "checkboxes",
+      anchor: ["Approximate location", "Crash logs"],
+      options: [
+        "Approximate location", "Precise location",
+        "Name", "Email address", "User IDs", "Address", "Phone number", "Race and ethnicity",
+        "Political or religious beliefs", "Sexual orientation", "Other info",
+        "User payment info", "Purchase history", "Credit score", "Other financial info",
+        "Health info", "Fitness info",
+        "Emails", "SMS or MMS", "Other in-app messages",
+        "Photos", "Videos",
+        "Voice or sound recordings", "Music files", "Other audio files",
+        "Files and docs", "Calendar events", "Contacts",
+        "App interactions", "In-app search history", "Installed apps", "Other user-generated content", "Other actions",
+        "Web browsing history",
+        "Crash logs", "Diagnostics", "Other app performance data",
+        "Device or other IDs",
+      ],
+      answer: (d) => (Array.isArray(d.data_types) ? d.data_types : null),
+    },
+    {
       // Checkbox questions name every option so the extension can untick
       // the ones the manifest excludes, and touches no checkbox outside them.
       // The anchor is a set of option labels that only this screen shows.

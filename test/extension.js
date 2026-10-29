@@ -151,7 +151,7 @@ test("summarize splits the report and lists same-form questions not on screen", 
   assert.equal(s.filled.length, 1);
   assert.equal(s.unfilled.length, 1);
   assert.equal(s.unknown.length, 1);
-  assert.deepEqual([...s.notSeen.map((x) => x.form)], ["data_safety", "data_safety"]);
+  assert.deepEqual([...s.notSeen.map((x) => x.form)], ["data_safety", "data_safety", "data_safety"]);
 });
 
 test("app access is answered by option text", () => {
@@ -194,6 +194,24 @@ test("planChecks ticks listed options, unticks the rest, ignores foreign boxes",
   const plan = avow.planChecks(options, q, ["13-15", "18 and over"]);
   assert.deepEqual([...plan.map((p) => [p.option.label, p.want])].map((x) => [...x]),
     [["6-8", false], ["13-15", true], ["18 and over", true]]);
+});
+
+test("data types tick exactly, so Photos never ticks Photos and videos", () => {
+  const avow = load("questions.js", "fill.js");
+  const page = tree("Location Approximate location Precise location App info and performance Crash logs Diagnostics", "x");
+  const q = avow.locate(page, access).question;
+  assert.equal(q.kind, "checkboxes");
+  assert.equal(q.form, "data_safety");
+  const options = ["Photos and videos", "Photos", "Videos", "Crash logs"].map((label) => ({ label }));
+  const plan = avow.planChecks(options, q, ["Photos", "Crash logs"]);
+  assert.deepEqual([...plan.map((p) => `${p.option.label}=${p.want}`)], ["Photos=true", "Videos=false", "Crash logs=true"]);
+});
+
+test("data types refuse a manifest value Play does not list", () => {
+  const avow = load("questions.js");
+  const q = avow.QUESTIONS.find((x) => x.kind === "checkboxes" && x.form === "data_safety");
+  const r = avow.answerFor({ declarations: { data_safety: { source: "answered", data_types: ["crash logs", "telemetry"] } } }, q);
+  assert.match(r.reason, /"telemetry", not an option/);
 });
 
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);

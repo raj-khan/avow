@@ -42,7 +42,7 @@ tests. Plain MV3, no build step, no dependencies.
 | E5 | Docs: load-unpacked instructions, ARCHITECTURE.md | done |
 | E6 | App access: a radio question answered by option text, not Yes/No | done |
 | E7 | Checkbox questions: Target audience age groups, ticking and unticking | done |
-| E8 | Data safety data types as a checkbox question | todo |
+| E8 | Data safety data types as a checkbox question | done |
 | E9 | Docs: coverage in extension README and ARCHITECTURE.md | todo |
 
 ## Deliberately not taken from v2
