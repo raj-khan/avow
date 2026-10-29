@@ -21,6 +21,10 @@
       .warn { color: #b06000; }
       .error { color: #c5221f; }
       ul { margin: 4px 0; padding-left: 18px; }
+      h4 { margin: 10px 0 2px; font-size: 12px; text-transform: uppercase; color: #5f6368; }
+      li.jump { cursor: pointer; }
+      li.jump:hover { text-decoration: underline; }
+      small { color: #5f6368; }
     </style>
     <div class="panel">
       <header>
@@ -73,12 +77,42 @@
   $("fill").addEventListener("click", () => {
     if (!avow.manifest) return;
     const report = avow.fillPage(avow.manifest);
-    const n = (s) => report.filter((r) => r.status === s).length;
-    $("result").textContent = report.length
-      ? `Filled ${n("filled")}, left ${n("unfilled")} for you (yellow). Review, then save in the Console.`
-      : "No yes/no questions found on this page.";
-    avow.lastReport = report;
+    const { filled, unfilled, unknown, notSeen } = avow.summarize(report);
+    $("result").replaceChildren();
+    if (!report.length) {
+      $("result").textContent = "No yes/no questions found on this page.";
+      return;
+    }
+    const line = document.createElement("p");
+    line.textContent = `Filled ${filled.length}. Everything outlined yellow is yours to answer. ` +
+      "Review the page, then save in the Console.";
+    $("result").append(line);
+    section("Left for you", unfilled.map((r) => [r.question.text, r.reason, r.block]));
+    section("Not in avow's question list", unknown.map((r) => [r.text, "", r.block]));
+    section("Not seen on this page", notSeen.map((q) => [q.text, "may be on the next step of this form"]));
   });
+
+  function section(title, items) {
+    if (!items.length) return;
+    const h = document.createElement("h4");
+    h.textContent = `${title} (${items.length})`;
+    const ul = document.createElement("ul");
+    for (const [text, note, block] of items) {
+      const li = document.createElement("li");
+      li.textContent = text;
+      if (note) {
+        const small = document.createElement("small");
+        small.textContent = ` ${note}`;
+        li.append(small);
+      }
+      if (block) {
+        li.className = "jump";
+        li.addEventListener("click", () => block.scrollIntoView({ behavior: "smooth", block: "center" }));
+      }
+      ul.append(li);
+    }
+    $("result").append(h, ul);
+  }
 
   document.body.append(host);
 })((globalThis.avow = globalThis.avow || {}));

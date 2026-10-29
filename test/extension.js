@@ -139,5 +139,20 @@ test("pickOption matches the answer word, not a word inside a description", () =
   assert.equal(avow.pickOption([{ label: "Not sure" }], "No"), null);
 });
 
+test("summarize splits the report and lists same-form questions not on screen", () => {
+  const avow = load("questions.js", "fill.js");
+  const q = (text) => avow.QUESTIONS.find((x) => x.text.includes(text));
+  const report = [
+    { status: "filled", question: q("collect or share"), label: "No" },
+    { status: "unfilled", question: q("contain ads"), reason: "inherited" },
+    { status: "unknown", text: "Which age groups?" },
+  ];
+  const s = avow.summarize(report);
+  assert.equal(s.filled.length, 1);
+  assert.equal(s.unfilled.length, 1);
+  assert.equal(s.unknown.length, 1);
+  assert.deepEqual([...s.notSeen.map((x) => x.form)], ["data_safety", "data_safety"]);
+});
+
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
 process.exit(failed ? 1 : 0);
