@@ -242,6 +242,47 @@ test("data-types skips without a data_types list", () => {
   assert.equal(byId.get("data-types").verify(typed({ collects_user_data: false })).status, "skip");
 });
 
+const detailed = (details, over = {}) => typed({
+  collects_user_data: true,
+  shares_user_data: false,
+  data_types: Object.keys(details),
+  data_type_details: details,
+  ...over,
+});
+const crash = { collected: true, shared: false, ephemeral: false, required: true, collection_purposes: ["Analytics"] };
+
+test("data-type-details passes consistent per-type answers", () => {
+  assert.equal(byId.get("data-type-details").verify(detailed({ "Crash logs": crash })).status, "pass");
+});
+
+test("data-type-details fails contradictions, bad purposes and missing fields", () => {
+  const r = byId.get("data-type-details").verify(detailed({
+    "Crash logs": { ...crash, shared: true, collection_purposes: ["analytics", "Telemetry"] },
+    "Diagnostics": { collected: true },
+  }));
+  assert.equal(r.status, "fail");
+  assert.deepEqual(r.detail, [
+    "Crash logs: shared, but data_safety.shares_user_data is not true",
+    'Crash logs: collection_purposes "analytics", Play spells it "Analytics"',
+    'Crash logs: collection_purposes "Telemetry" is not a Play purpose',
+    "Crash logs: sharing_purposes is empty; the Console asks for at least one purpose",
+    "Diagnostics: required must be true or false",
+    "Diagnostics: ephemeral must be true or false",
+    "Diagnostics: collection_purposes is empty; the Console asks for at least one purpose",
+  ]);
+});
+
+test("data-type-details fails details for an undeclared type, warns on missing ones", () => {
+  const r = byId.get("data-type-details");
+  const stray = r.verify(detailed({ "Crash logs": crash }, { data_types: ["Crash logs", "Diagnostics"], data_type_details: { "Crash logs": crash, "Photos": crash } }));
+  assert.equal(stray.status, "fail");
+  assert.ok(stray.detail.includes("Photos: has details but is not in data_types"));
+  const gap = r.verify(detailed({ "Crash logs": crash }, { data_types: ["Crash logs", "Diagnostics"] }));
+  assert.equal(gap.status, "warn");
+  assert.deepEqual(gap.detail, ["Diagnostics: no entry in data_type_details"]);
+  assert.equal(r.verify(typed({ data_types: [] })).status, "skip");
+});
+
 test("listing-limits fails an over-long title", () => {
   const r = byId.get("listing-limits").verify({ listing: { title: "x".repeat(31) } });
   assert.equal(r.status, "fail");
