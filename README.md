@@ -52,7 +52,8 @@ permissions you never wrote, and that gap is the whole failure mode.
 
 ## Status
 
-0.1.0, extracted from a real first submission. The form order in
+0.1.0, extracted from a real first submission. See `ARCHITECTURE.md` for the
+plan and the reasoning behind each design call. The form order in
 `src/rules/completeness.js` was observed in the Console; Play does not publish
 it. No dependencies, Node 20+.
 
