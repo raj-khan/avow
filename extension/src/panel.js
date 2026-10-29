@@ -179,18 +179,11 @@
     $("result").replaceChildren();
     try {
       avow.checkSize(file.size);
-      const { manifest, warnings } = avow.readManifest(await file.text());
-      avow.manifest = manifest;
-      const n = Object.keys(manifest.declarations).length;
-      $("status").textContent = `${manifest.app?.package || file.name}: ${n} declarations loaded.`;
-      for (const w of warnings) {
-        const li = document.createElement("li");
-        li.textContent = w;
-        $("warnings").append(li);
-      }
+      const { app, count, warnings } = avow.load(await file.text(), file.size);
+      $("status").textContent = `${app || file.name}: ${count} declarations loaded.`;
+      for (const w of warnings) $("warnings").append(el("li", { text: w }));
       $("fill").disabled = false;
     } catch (e) {
-      avow.manifest = null;
       $("fill").disabled = true;
       $("status").textContent = "No manifest loaded.";
       $("error").textContent = e.message;
@@ -201,49 +194,21 @@
   // one, and saving stays theirs too.
   $("fill").addEventListener("click", () => {
     if (!avow.manifest) return;
-    const report = avow.fillPage(avow.manifest);
-    const { filled, unfilled, unknown, notSeen } = avow.summarize(report);
+    const r = avow.runFill();
     $("result").replaceChildren();
     $("steps").hidden = true;
     $("legend").hidden = false;
-    $("undo").disabled = !avow.canUndo();
-    const note = avow.languageNote(document.documentElement.lang);
-    if (!report.length) {
-      $("summary").textContent = note || "No questions avow knows were found on this page.";
-      return;
-    }
-    if (note) $("error").textContent = note;
-    const left = unfilled.length + unknown.length;
-    $("tally").textContent = `${filled.length} filled, ${left} left`;
+    $("undo").disabled = !r.canUndo;
+    $("summary").textContent = r.summary;
+    if (!r.found) return;
+    if (r.note) $("error").textContent = r.note;
+    $("tally").textContent = `${r.filled} filled, ${r.left} left`;
     // Nothing left to do: get out of the way so the Save bar is free.
-    if (!left) avow.setCollapsed(true);
-    $("summary").textContent = `Filled ${filled.length}, left ${left} for you. ` +
-      "Everything outlined orange is yours to answer. Review the page, then save in the Console.";
-    section("Left for you", unfilled.map((r) => [r.question.text || r.question.form, r.reason, r.block]));
-    section("Not in avow's question list", unknown.map((r) => [r.text, "", r.block]));
-    section("Not seen on this page", notSeen.map((q) => [q.text || q.anchor.join(", "), "may be on the next step of this form"]));
+    if (!r.left) avow.setCollapsed(true);
+    for (const s of r.sections) section(s.title, s.items);
   });
 
-  const CONTROLS = 'input, [role="radio"], [role="checkbox"], select, textarea, button, [tabindex]';
-  function goTo(block) {
-    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    block.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
-    // The first control that can take focus; failing that, the block itself,
-    // so keyboard users still land on the question rather than staying put.
-    let target = [...block.querySelectorAll(CONTROLS)].find((n) => n.tabIndex >= 0 && !n.disabled);
-    if (!target) {
-      if (!block.hasAttribute("tabindex")) block.setAttribute("tabindex", "-1");
-      target = block;
-    }
-    target.focus({ preventScroll: true });
-  }
-
-  // Play Console changes screens without reloading, so marks and results
-  // from the last screen would describe questions that are gone. The
-  // Navigation API reports those in-app moves; where it is missing nothing
-  // listens, rather than watching the whole page with an observer.
-  function pageChanged() {
-    avow.clearMarks();
+  avow.onPageChange(() => {
     $("undo").disabled = true;
     $("result").replaceChildren();
     $("summary").textContent = "";
@@ -251,32 +216,26 @@
     $("legend").hidden = true;
     $("error").textContent = "";
     if (avow.manifest) $("status").textContent = "Page changed. Fill again when this screen is ready.";
-  }
-  globalThis.navigation?.addEventListener?.("currententrychange", pageChanged);
+  });
 
   $("undo").addEventListener("click", () => {
-    const { restored, failed } = avow.undoFill();
+    const { summary } = avow.undo();
     $("undo").disabled = true;
     $("result").replaceChildren();
     $("tally").textContent = "";
     $("legend").hidden = true;
-    $("summary").textContent = `Undid ${restored} change${restored === 1 ? "" : "s"}.` +
-      (failed ? ` ${failed} could not be put back by clicking (a radio question that had no answer before, ` +
-        "or a control that ignored the click); check those yourself." : "");
+    $("summary").textContent = summary;
   });
 
   function section(title, items) {
-    if (!items.length) return;
-    const h = document.createElement("h4");
-    h.textContent = `${title} (${items.length})`;
-    const ul = document.createElement("ul");
-    for (const [text, note, block] of items) {
-      const li = document.createElement("li");
-      if (block) {
+    const ul = el("ul");
+    for (const { text, note, ref } of items) {
+      const li = el("li");
+      if (ref !== null) {
         // A real button, so the list works from the keyboard; it moves focus
         // to the question's first control so the answer can be set at once.
         const jump = el("button", { class: "jump", type: "button", text });
-        jump.addEventListener("click", () => goTo(block));
+        jump.addEventListener("click", () => avow.jump(ref));
         li.append(jump);
       } else {
         li.textContent = text;
@@ -284,7 +243,7 @@
       if (note) li.append(el("small", { text: ` ${note}` }));
       ul.append(li);
     }
-    $("result").append(h, ul);
+    $("result").append(el("h4", { text: `${title} (${items.length})` }), ul);
   }
 
   // The host is a manual popover, so the browser puts it in the top layer

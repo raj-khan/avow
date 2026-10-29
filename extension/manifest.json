@@ -26,6 +26,7 @@
         "src/load.js",
         "src/questions.js",
         "src/fill.js",
+        "src/actions.js",
         "src/panel.js"
       ],
       "run_at": "document_idle"
