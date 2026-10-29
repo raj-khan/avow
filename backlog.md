@@ -67,7 +67,7 @@ the report.
 | X5 | P0 | Manual | Author `extension/icons/icon.svg`, export PNGs at 16, 24, 32, 48 and 128, hand-tune 16px; no Google marks or colors | done |
 | X6 | P0 | Code | Add `icons` and `action` (`default_title`, `default_icon` 16/24/32) to `manifest.json` | done |
 | X7 | P0 | Code | Manifest checks in `test/extension.js`: icon files exist and their dimensions match their keys (via `src/lib/imagesize.js`), `version` format valid, `description` 132 characters or fewer | done |
-| X8 | P0 | Code | `scripts/pack-extension.sh`: allowlist zip (`manifest.json`, `src/`, `icons/`) from inside `extension/` into `dist/`, from a clean git tree | todo |
+| X8 | P0 | Code | `scripts/pack-extension.sh`: allowlist zip (`manifest.json`, `src/`, `icons/`) from inside `extension/` into `dist/`, from a clean git tree | done |
 | X9 | P0 | Code | Add `PRIVACY.md` (no collection, in-memory processing only, Limited Use statement) and link it from the README | todo |
 | X10 | P0 | Manual | Fill the Privacy practices tab: single-purpose sentence, "No remote code", no data types, certifications ticked, privacy policy URL | todo |
 | X11 | P1 | Code | Build the panel with `createElement` and a `<style>` set via `textContent`, then ban `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `eval` and `new Function` in the source test | todo |

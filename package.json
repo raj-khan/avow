@@ -5,7 +5,10 @@
   "type": "module",
   "bin": { "avow": "src/cli.js" },
   "engines": { "node": ">=20" },
-  "scripts": { "test": "node test/run.js && node test/extension.js" },
+  "scripts": {
+    "test": "node test/run.js && node test/extension.js",
+    "pack:extension": "scripts/pack-extension.sh"
+  },
   "license": "MIT",
   "private": true
 }
