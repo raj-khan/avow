@@ -236,6 +236,21 @@
     target.focus({ preventScroll: true });
   }
 
+  // Play Console changes screens without reloading, so marks and results
+  // from the last screen would describe questions that are gone. The
+  // Navigation API reports those in-app moves; where it is missing nothing
+  // listens, rather than watching the whole page with an observer.
+  function pageChanged() {
+    avow.clearMarks();
+    $("result").replaceChildren();
+    $("summary").textContent = "";
+    $("tally").textContent = "";
+    $("legend").hidden = true;
+    $("error").textContent = "";
+    if (avow.manifest) $("status").textContent = "Page changed. Fill again when this screen is ready.";
+  }
+  globalThis.navigation?.addEventListener?.("currententrychange", pageChanged);
+
   function section(title, items) {
     if (!items.length) return;
     const h = document.createElement("h4");
