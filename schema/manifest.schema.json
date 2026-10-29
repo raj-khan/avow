@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/salim/store-decl/schema/manifest.schema.json",
+  "title": "Play release manifest",
+  "type": "object",
+  "required": ["schema", "app", "declarations"],
+  "properties": {
+    "schema": { "const": 1 },
+    "updated": { "type": "string", "format": "date" },
+    "app": {
+      "type": "object",
+      "required": ["package"],
+      "properties": {
+        "package": { "type": "string", "pattern": "^[a-z][a-z0-9_]*(\\.[a-z0-9_]+)+$" },
+        "version_name": { "type": "string" },
+        "version_code": { "type": "integer", "minimum": 1 },
+        "default_language": { "type": "string" },
+        "app_or_game": { "enum": ["app", "game"] },
+        "free_or_paid": { "enum": ["free", "paid"] },
+        "contains_ads": { "type": "boolean" },
+        "in_app_purchases": { "type": "boolean" }
+      }
+    },
+    "contacts": { "type": "object" },
+    "listing": {
+      "type": "object",
+      "properties": {
+        "title": { "type": "string", "maxLength": 30 },
+        "short_description": { "type": "string", "maxLength": 80 },
+        "full_description": { "type": "string", "maxLength": 4000 },
+        "whats_new": { "type": "string", "maxLength": 500 },
+        "category": { "type": "string" },
+        "tags": { "type": "array", "items": { "type": "string" } }
+      }
+    },
+    "assets": {
+      "type": "object",
+      "properties": {
+        "icon_512": { "type": "string" },
+        "feature_graphic_1024x500": { "type": "string" },
+        "phone_screenshots": {
+          "type": "array",
+          "minItems": 2,
+          "maxItems": 8,
+          "items": { "type": "string" }
+        },
+        "promo_video": { "type": ["string", "null"] },
+        "bundle": { "type": "string" }
+      }
+    },
+    "declarations": {
+      "type": "object",
+      "description": "One entry per Console questionnaire. Keys match src/rules/completeness.js.",
+      "additionalProperties": {
+        "type": "object",
+        "required": ["source"],
+        "properties": {
+          "source": {
+            "enum": ["answered", "planned", "n/a"],
+            "description": "answered means entered in the Console, not merely decided."
+          },
+          "question": { "type": "string" },
+          "console_path": { "type": "string" },
+          "why": { "type": "string", "minLength": 1 }
+        }
+      }
+    },
+    "invariants": {
+      "type": "object",
+      "description": "Assertions a CI job checks before release.",
+      "additionalProperties": {
+        "type": "object",
+        "properties": {
+          "claimed": { "type": "number" },
+          "source_of_truth": { "type": "string" },
+          "pointer": { "type": "string", "default": "stations" },
+          "verified": { "type": "string", "format": "date" }
+        }
+      }
+    },
+    "blockers": { "type": "object" },
+    "console_forms_seen": { "type": "array", "items": { "type": "string" } }
+  }
+}

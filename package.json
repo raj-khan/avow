@@ -1,0 +1,11 @@
+{
+  "name": "store-decl",
+  "version": "0.1.0",
+  "description": "Google Play declarations as code: author them once, verify them against the repo, explain every answer.",
+  "type": "module",
+  "bin": { "store-decl": "src/cli.js" },
+  "engines": { "node": ">=20" },
+  "scripts": { "test": "node test/run.js" },
+  "license": "MIT",
+  "private": true
+}
