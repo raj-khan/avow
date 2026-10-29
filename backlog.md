@@ -28,6 +28,19 @@ Status: `todo`, `done`.
 | 16 | `extends`: a manifest inherits a shared baseline, per-app overrides win | 11 Phase 4 | done |
 | 17 | Docs: ARCHITECTURE.md roadmap and rules table, README, drop "push" from the roadmap | 12 | done |
 
+## Chrome extension (v2 section 9)
+
+Lives in `extension/`, beside the CLI, so it shares the manifest schema and
+tests. Plain MV3, no build step, no dependencies.
+
+| # | Task | Status |
+|---|------|--------|
+| E1 | Scaffold: MV3 manifest with no permissions, in-page panel, manifest file picker, schema version check | todo |
+| E2 | Question-text matching: map manifest answers to Console question wording | todo |
+| E3 | Fill and highlight: tick the matching option, green; never submit | todo |
+| E4 | Unmapped panel: questions on screen with no answer, answers with no question on screen | todo |
+| E5 | Docs: load-unpacked instructions, ARCHITECTURE.md | todo |
+
 ## Deliberately not taken from v2
 
 - **`completeness` failing on a missing `why`.** Play does not reject for it,
@@ -43,6 +56,5 @@ Status: `todo`, `done`.
 
 - Phase 0 validation sprint and outreach (sections 3, 8).
 - Documentation site, pricing page, Stripe (sections 10, 11).
-- Chrome extension (section 9, Phase 3): its own repo and review.
 - Cross-app drift detection and dashboard (Phase 4 weeks 12-13): need the
   factory interviews first.
