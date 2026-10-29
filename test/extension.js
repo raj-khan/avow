@@ -85,7 +85,7 @@ test("answerFor maps declarations to Yes or No", () => {
   };
   assert.deepEqual({ ...avow.answerFor(m, q("advertising_id")) }, { label: "No" });
   assert.deepEqual({ ...avow.answerFor(m, q("data_safety", "collect or share")) }, { label: "Yes" });
-  assert.match(avow.answerFor(m, q("data_safety", "encrypted")).reason, /no yes\/no answer/);
+  assert.match(avow.answerFor(m, q("data_safety", "encrypted")).reason, /no answer/);
   assert.match(avow.answerFor(m, q("ads")).reason, /not in the manifest/);
 });
 
@@ -152,6 +152,25 @@ test("summarize splits the report and lists same-form questions not on screen", 
   assert.equal(s.unfilled.length, 1);
   assert.equal(s.unknown.length, 1);
   assert.deepEqual([...s.notSeen.map((x) => x.form)], ["data_safety", "data_safety"]);
+});
+
+test("app access is answered by option text", () => {
+  const avow = load("questions.js", "fill.js");
+  const q = avow.QUESTIONS.find((x) => x.form === "app_access");
+  const block = tree(
+    "App access All functionality in my app is available without any access restrictions " +
+    "All or some functionality in my app is restricted Add instructions",
+    "options",
+  );
+  assert.equal(avow.locate(block, access).question, q);
+  const options = [
+    { label: "All functionality in my app is available without any access restrictions" },
+    { label: "All or some functionality in my app is restricted  Provide login details" },
+  ];
+  const label = (restricted) =>
+    avow.answerFor({ declarations: { app_access: { source: "answered", restricted } } }, q).label;
+  assert.equal(avow.pickOption(options, label(false)), options[0]);
+  assert.equal(avow.pickOption(options, label(true)), options[1]);
 });
 
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
