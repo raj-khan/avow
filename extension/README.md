@@ -41,6 +41,10 @@ pick. It does not decide anything: the answers come from the manifest, which
 | Target audience | `target_audience.age_groups` | checkboxes |
 | Data safety, first step | `data_safety.collects_user_data` / `shares_user_data`, `encrypted_in_transit`, `deletion_request_mechanism` | yes/no |
 | Data safety, data types | `data_safety.data_types` (Play's labels, e.g. `"Crash logs"`) | checkboxes |
+| Data safety, each data type: collected or shared | `data_type_details[type].collected` / `.shared` | checkboxes |
+| Data safety, each data type: processed ephemerally | `data_type_details[type].ephemeral` | yes/no |
+| Data safety, each data type: required or optional | `data_type_details[type].required` | radio, by option text |
+| Data safety, each data type: purposes | `data_type_details[type].collection_purposes` / `.sharing_purposes` | checkboxes |
 | News app | `news_app.is_news_app` | yes/no |
 | Government app | `government_app.is_government_app` | yes/no |
 
@@ -49,8 +53,11 @@ option on that screen is unticked. Checkboxes that belong to no known question
 (consent boxes, filters, category headings) are never touched. A value that is
 not one of Play's options is refused with the reason, not guessed at.
 
-Still manual: login instructions for restricted apps, the per-data-type
-collected/shared/purpose screens, Content ratings, Financial features, Health,
+Per-type screens are matched to a data type by their heading: the nearest
+heading that names exactly one of Play's data types, by its whole text. If
+none does, or two do, the screen is left yellow rather than guessed.
+
+Still manual: login instructions for restricted apps, Content ratings, Financial features, Health,
 Data deletion URL and anything with free text.
 
 The wording in `src/questions.js` comes from Play's help pages and has not yet

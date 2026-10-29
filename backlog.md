@@ -49,7 +49,7 @@ tests. Plain MV3, no build step, no dependencies.
 | E11 | Extension: work out which data type a per-type screen is for | done |
 | E12 | Extension: collected/shared, processed ephemerally, required or optional | done |
 | E13 | Extension: collection and sharing purposes, list kept in step with the CLI | done |
-| E14 | Docs: per-type screens in extension README, README and ARCHITECTURE.md | todo |
+| E14 | Docs: per-type screens in extension README, README and ARCHITECTURE.md | done |
 
 ## Deliberately not taken from v2
 
