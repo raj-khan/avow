@@ -1,0 +1,40 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>avow</title>
+  <link rel="stylesheet" href="src/sidepanel.css">
+</head>
+<body>
+  <header>
+    <img src="icons/icon32.png" width="20" height="20" alt="">
+    <strong>avow</strong>
+    <span id="tally"></span>
+  </header>
+  <main>
+    <div class="actions">
+      <button id="pick" type="button">Pick manifest</button>
+      <button id="fill" type="button" disabled>Fill this page</button>
+      <button id="undo" type="button" disabled>Undo fill</button>
+    </div>
+    <input id="file" type="file" accept=".json,application/json" hidden>
+    <p id="page" role="status"></p>
+    <ol id="steps">
+      <li>Open a Play Console declaration page in this tab.</li>
+      <li>Pick your release-manifest.json. It stays in this panel's memory and is forgotten when you close it.</li>
+      <li>Fill this page. avow ticks the answers your manifest gives.</li>
+      <li>Review the marked questions, then save in the Console yourself. avow never saves.</li>
+    </ol>
+    <div id="status" role="status"></div>
+    <div id="error" class="error" role="alert"></div>
+    <ul id="warnings" class="warn"></ul>
+    <p id="summary" role="status"></p>
+    <p id="legend" hidden></p>
+    <div id="result"></div>
+  </main>
+  <script src="src/load.js"></script>
+  <script src="src/questions.js"></script>
+  <script src="src/fill.js"></script>
+  <script src="src/sidepanel.js"></script>
+</body>
+</html>

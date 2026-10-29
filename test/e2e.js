@@ -7,6 +7,7 @@
 //
 //   node test/e2e.js                 # uses google-chrome on PATH
 //   CHROME=/path/to/chrome node test/e2e.js
+//   AVOW_E2E_SCREENSHOT=panel.png node test/e2e.js   # also save the side panel
 //
 // Branded Chrome 137+ ignores --load-extension, so the extension is loaded
 // with the DevTools Extensions.loadUnpacked command instead, which needs the
@@ -14,7 +15,7 @@
 // throwaway temp dir, so nothing touches your own Chrome.
 
 import { spawn } from "node:child_process";
-import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import assert from "node:assert/strict";
@@ -92,7 +93,7 @@ function cdp(input, output) {
 
 async function main() {
   const c = cdp(chrome.stdio[3], chrome.stdio[4]);
-  await c.send("Extensions.loadUnpacked", { path: EXT });
+  const { id: extensionId } = await c.send("Extensions.loadUnpacked", { path: EXT });
 
   const { targetId } = await c.send("Target.createTarget", { url: "about:blank" });
   const { sessionId } = await c.send("Target.attachToTarget", { targetId, flatten: true });
@@ -119,15 +120,16 @@ async function main() {
   await s("Page.navigate", { url: URL_UNDER_TEST });
 
   // The content script runs at document_idle in its own isolated world.
-  let world;
+  let world = null;
   for (let i = 0; i < 50 && !world; i++) {
     await sleep(100);
     world = contexts.find((x) => x.auxData?.type === "isolated" && x.name === "avow");
   }
   assert.ok(world, "content script did not inject on the Console URL");
 
-  const evalIn = async (expression, contextId) => {
-    const { result, exceptionDetails } = await s("Runtime.evaluate", { expression, contextId, returnByValue: true });
+  const evalIn = async (expression, contextId, session = sessionId) => {
+    const { result, exceptionDetails } = await c.send("Runtime.evaluate",
+      { expression, contextId, returnByValue: true, awaitPromise: true }, session);
     if (exceptionDetails) throw new Error(exceptionDetails.exception?.description || exceptionDetails.text);
     return result.value;
   };
@@ -152,6 +154,53 @@ async function main() {
   ]`);
   assert.deepEqual(state, [true, "true"]);
   console.log("✓ e2e: injected on the Console URL, filled 2 questions, controls read back as set");
+
+  // Side panel: reload the Console tab to clear the answers, open the side
+  // panel page as a tab, point it at the Console tab and fill through the
+  // bridge. Chrome gives no way to open the real side panel from DevTools.
+  contexts.length = 0;
+  await s("Page.reload");
+  world = null;
+  for (let i = 0; i < 50 && !world; i++) {
+    await sleep(100);
+    world = contexts.find((x) => x.auxData?.type === "isolated" && x.name === "avow");
+  }
+  assert.ok(world, "content script did not inject after reload");
+
+  const panelTarget = await c.send("Target.createTarget", { url: `chrome-extension://${extensionId}/sidepanel.html` });
+  const { sessionId: sp } = await c.send("Target.attachToTarget", { targetId: panelTarget.targetId, flatten: true });
+  await sleep(500);
+  const viaPanel = await evalIn(`(async () => {
+    const me = await chrome.tabs.getCurrent();
+    let attached = false;
+    for (const t of await chrome.tabs.query({})) {
+      if (t.id !== me.id && await avowSidePanel.attach(t.id)) { attached = true; break; }
+    }
+    if (!attached) return "no Console tab answered";
+    await avowSidePanel.loadText(JSON.stringify({ schema: 1, declarations: {
+      ads: { source: "answered", contains_ads: false },
+      advertising_id: { source: "answered", uses_advertising_id: false },
+    } }));
+    return (await avowSidePanel.fill()).summary;
+  })()`, undefined, sp);
+  assert.match(viaPanel, /^Filled 2, left 0/);
+  assert.deepEqual(await evalIn(`[
+    document.querySelector('input[value="no"]').checked,
+    document.querySelector('[aria-label="No"]').getAttribute("aria-checked"),
+    document.getElementById("avow-panel-host").style.display,
+  ]`), [true, "true", "none"]);
+
+  // AVOW_E2E_SCREENSHOT=out.png saves the filled side panel, for docs and review.
+  if (process.env.AVOW_E2E_SCREENSHOT) {
+    await c.send("Emulation.setDeviceMetricsOverride", { width: 360, height: 520, deviceScaleFactor: 1, mobile: false }, sp);
+    const { data } = await c.send("Page.captureScreenshot", { format: "png" }, sp);
+    writeFileSync(process.env.AVOW_E2E_SCREENSHOT, Buffer.from(data, "base64"));
+  }
+  await c.send("Target.closeTarget", { targetId: panelTarget.targetId });
+  await sleep(300);
+  assert.notEqual(await evalIn(`getComputedStyle(document.getElementById("avow-panel-host")).display`), "none",
+    "in-page panel did not come back after the side panel closed");
+  console.log("✓ e2e: side panel attached over the bridge, filled 2, in-page panel hid and came back");
 }
 
 let failed = false;

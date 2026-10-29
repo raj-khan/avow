@@ -10,12 +10,21 @@
     "128": "icons/icon128.png"
   },
   "action": {
-    "default_title": "avow: fill Play Console declarations from your manifest",
+    "default_title": "avow: open the side panel",
     "default_icon": {
       "16": "icons/icon16.png",
       "24": "icons/icon24.png",
       "32": "icons/icon32.png"
     }
+  },
+  "permissions": [
+    "sidePanel"
+  ],
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
   },
   "content_scripts": [
     {
