@@ -30,7 +30,7 @@ change should be checked against it:
 node src/cli.js check /media/raj/Work1/quran-radio --no-color
 ```
 
-Expected today: 4 pass, 2 warn, 0 fail. The two warnings are real and correct
+Expected today: 5 pass, 2 warn, 0 fail. The two warnings are real and correct
 (five declarations carry `answer_notes` rather than a `why`; the screenshots
 are genuinely 1:2.233). Do not "fix" them by weakening a rule.
 
