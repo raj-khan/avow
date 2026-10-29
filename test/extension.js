@@ -342,5 +342,11 @@ test("checkSize refuses files over 1 MB before they are read", () => {
   assert.throws(() => avow.checkSize(avow.MAX_MANIFEST_BYTES + 1), /at most 1 MB/);
 });
 
+test("languageNote stays quiet for English and explains anything else", () => {
+  const avow = load("questions.js");
+  for (const lang of ["", "en", "en-US", "EN-gb", undefined]) assert.equal(avow.languageNote(lang), null);
+  assert.match(avow.languageNote("de"), /"de".*English/);
+});
+
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
 process.exit(failed ? 1 : 0);

@@ -145,10 +145,12 @@
     const report = avow.fillPage(avow.manifest);
     const { filled, unfilled, unknown, notSeen } = avow.summarize(report);
     $("result").replaceChildren();
+    const note = avow.languageNote(document.documentElement.lang);
     if (!report.length) {
-      $("summary").textContent = "No questions avow knows were found on this page.";
+      $("summary").textContent = note || "No questions avow knows were found on this page.";
       return;
     }
+    if (note) $("error").textContent = note;
     const left = unfilled.length + unknown.length;
     $("tally").textContent = `${filled.length} filled, ${left} left`;
     // Nothing left to do: get out of the way so the Save bar is free.

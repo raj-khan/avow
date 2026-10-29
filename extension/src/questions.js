@@ -159,6 +159,15 @@
     },
   ];
 
+  // Questions are matched on their English wording, so a Console in another
+  // language matches nothing. Say so, rather than "no questions found".
+  avow.languageNote = (lang) => {
+    const l = String(lang || "").trim().toLowerCase();
+    if (!l || l === "en" || l.startsWith("en-")) return null;
+    return `This Console is in "${lang}". avow matches the English wording of each question, ` +
+      "so switch the Console to English to fill it.";
+  };
+
   // Case, punctuation, curly quotes and spacing vary between Console
   // releases and translations of the same sentence; the words do not.
   avow.normalize = (s) =>
