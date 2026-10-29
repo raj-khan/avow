@@ -7,6 +7,7 @@ import { rules, byId } from "../src/rules/index.js";
 import { FORMS, FORMS_OBSERVED, formsAge } from "../src/rules/completeness.js";
 import { imageSize } from "../src/lib/imagesize.js";
 import { permissions, gradleDependencies, permissionSources } from "../src/lib/android.js";
+import { github } from "../src/lib/report.js";
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -376,6 +377,19 @@ test("formsAge counts whole days since FORMS was observed", () => {
   const seen = new Date(`${FORMS_OBSERVED.on}T00:00:00Z`);
   assert.equal(formsAge(seen), 0);
   assert.equal(formsAge(new Date(seen.getTime() + 91 * 86400000 + 3600000)), 91);
+});
+
+test("github format annotates fails and warns, not passes or skips", () => {
+  const lines = github([
+    { status: "fail", rule: "schema", message: "1 schema error(s)", detail: ["$.app: missing, really"] },
+    { status: "warn", rule: "assets", message: "100% sure" },
+    { status: "pass", rule: "claims", message: "ok" },
+    { status: "skip", rule: "permissions-inventory", message: "no build" },
+  ], "store/release-manifest.json");
+  assert.deepEqual(lines, [
+    "::error file=store/release-manifest.json,title=avow schema::1 schema error(s)%0A$.app: missing, really",
+    "::warning file=store/release-manifest.json,title=avow assets::100%25 sure",
+  ]);
 });
 
 test("every rule carries a question, a path and a reason", () => {
