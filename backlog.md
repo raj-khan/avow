@@ -12,7 +12,7 @@ Status: `todo`, `done`.
 |---|------|-----------|--------|
 | 1 | Rename `store-decl` to `avow` (package, bin, CLI text, docs, schema `$id`) | n/a | done |
 | 2 | CI: GitHub Actions runs `npm test` on PRs and main | n/a | done |
-| 3 | `source` enum gains `inherited` and `unanswered`; `completeness` fails on `unanswered`, warns on `planned` and `inherited` | 4 | todo |
+| 3 | `source` enum gains `inherited` and `unanswered`; `completeness` fails on `unanswered`, warns on `planned` and `inherited` | 4 | done |
 | 4 | `--release` flag: `planned` and `inherited` fail instead of warn | 4 | todo |
 | 5 | Hand-rolled schema validator, run by `check` as a `schema` rule | 2, 11 Phase 1 | todo |
 | 6 | Dates on declarations (`answered_on`, `verified_on`) in schema and `init` | 4 | todo |

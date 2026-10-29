@@ -118,7 +118,7 @@ if (cmd === "init") {
     listing: { title: "", short_description: "", full_description: "", whats_new: "" },
     assets: { icon_512: "", feature_graphic_1024x500: "", phone_screenshots: [] },
     declarations: Object.fromEntries(
-      FORMS.map(([k, label]) => [k, { source: "planned", question: label, why: "" }])
+      FORMS.map(([k, label]) => [k, { source: "unanswered", question: label, why: "" }])
     ),
     invariants: {},
   };
