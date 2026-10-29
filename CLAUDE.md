@@ -1,4 +1,4 @@
-# store-decl
+# avow (formerly store-decl)
 
 Google Play declarations as code. Read `ARCHITECTURE.md` before changing
 anything structural; it holds the reasoning and the roadmap.

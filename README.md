@@ -1,4 +1,4 @@
-# store-decl
+# avow
 
 Google Play declarations as code: author them once, verify them against the
 repo, and keep the reasoning next to the answer.
@@ -19,16 +19,16 @@ questionnaires in the Play Console. The hard part is not typing. It is that
 - The reasoning is **never written down**, so the next release reconstructs it
   from memory.
 
-`store-decl` keeps the answers in one JSON file in the repo, with a `why` on
+`avow` keeps the answers in one JSON file in the repo, with a `why` on
 each, and fails CI when the file contradicts the code.
 
 ## Use
 
 ```sh
-store-decl init                 # write a starter manifest
-store-decl check                # verify it against this repo
-store-decl explain advertising  # why that answer is what it is
-store-decl forms                # every Console screen, in submission order
+avow init                 # write a starter manifest
+avow check                # verify it against this repo
+avow explain advertising  # why that answer is what it is
+avow forms                # every Console screen, in submission order
 ```
 
 `check` exits non-zero on a failure, so it drops into CI unchanged. Warnings
