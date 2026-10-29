@@ -30,13 +30,44 @@ function load(...files) {
   return ctx.avow;
 }
 
-test("extension asks for no permissions and runs only on the Play Console", () => {
+test("extension asks only for sidePanel and runs only on the Play Console", () => {
   const m = JSON.parse(readFileSync(join(EXT, "manifest.json"), "utf8"));
   assert.equal(m.manifest_version, 3);
-  for (const key of ["permissions", "host_permissions", "optional_permissions", "background", "externally_connectable", "web_accessible_resources"]) {
+  // sidePanel shows no install warning; anything else here changes what the
+  // listing and PRIVACY.md promise.
+  assert.deepEqual(m.permissions, ["sidePanel"]);
+  for (const key of ["host_permissions", "optional_permissions", "optional_host_permissions", "externally_connectable", "web_accessible_resources", "content_security_policy"]) {
     assert.equal(m[key], undefined, `manifest.json must not declare ${key}`);
   }
+  assert.deepEqual(m.background, { service_worker: "src/background.js" });
   assert.deepEqual(m.content_scripts.map((c) => c.matches).flat(), ["https://play.google.com/console/*"]);
+});
+
+// Each script may touch only the chrome.* APIs it needs. A new call has to be
+// added here on purpose, with the permission story checked.
+const CHROME_APIS = {
+  "background.js": ["chrome.sidePanel.setPanelBehavior"],
+  "bridge.js": [],
+  "sidepanel.js": ["chrome.tabs.connect", "chrome.tabs.query", "chrome.tabs.onActivated", "chrome.tabs.onUpdated", "chrome.runtime.lastError"],
+};
+
+test("scripts call only the chrome APIs they are allowed", () => {
+  for (const f of readdirSync(SRC).filter((f) => f.endsWith(".js"))) {
+    const used = [...new Set(readFileSync(join(SRC, f), "utf8").match(/\bchrome\.\w+\.\w+/g) ?? [])];
+    const allowed = CHROME_APIS[f] ?? [];
+    for (const api of used) assert.ok(allowed.includes(api), `${f} uses ${api}, which is not on its list`);
+  }
+});
+
+test("side panel page loads only local scripts, none inline", () => {
+  const html = readFileSync(join(EXT, "sidepanel.html"), "utf8");
+  assert.equal(/<script(?![^>]*\bsrc=)[^>]*>/.test(html), false, "inline <script> found");
+  for (const [, src] of html.matchAll(/\b(?:src|href)="([^"]+)"/g)) {
+    assert.ok(!/^[a-z]+:|^\/\//i.test(src), `${src} is not a local file`);
+    assert.ok(readFileSync(join(EXT, src)), `${src} is missing`);
+  }
+  const m = JSON.parse(readFileSync(join(EXT, "manifest.json"), "utf8"));
+  assert.equal(m.side_panel.default_path, "sidepanel.html");
 });
 
 // Chrome accepts 1 to 4 dot-separated integers, 0 to 65535, no leading zeros,

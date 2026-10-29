@@ -19,6 +19,6 @@ out="dist/avow-extension-$version.zip"
 mkdir -p dist
 rm -f "$out"
 git archive --format=zip -o "$out" HEAD:extension \
-  manifest.json src ':(glob)icons/icon*.png'
+  manifest.json sidepanel.html src ':(glob)icons/icon*.png'
 echo "$out ($(git rev-parse --short HEAD)); tag the upload ext-v$version"
 unzip -l "$out"
