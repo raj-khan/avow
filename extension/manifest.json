@@ -27,7 +27,8 @@
         "src/questions.js",
         "src/fill.js",
         "src/actions.js",
-        "src/panel.js"
+        "src/panel.js",
+        "src/bridge.js"
       ],
       "run_at": "document_idle"
     }

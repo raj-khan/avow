@@ -78,7 +78,10 @@
   // Navigation API reports those in-app moves; where it is missing nothing
   // listens, rather than watching the whole page with an observer.
   const pageListeners = [];
-  avow.onPageChange = (fn) => pageListeners.push(fn);
+  avow.onPageChange = (fn) => {
+    pageListeners.push(fn);
+    return () => pageListeners.splice(pageListeners.indexOf(fn), 1);
+  };
   globalThis.navigation?.addEventListener?.("currententrychange", () => {
     avow.clearMarks();
     targets = [];
