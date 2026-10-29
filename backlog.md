@@ -93,7 +93,7 @@ the report.
 | X31 | P3 | Manual | Verify a site in Search Console for the verified-publisher link | todo |
 | X32 | P3 | Code | Move to `chrome.sidePanel` (needs `action`, a panel script and messaging) | todo |
 | X32a | P3 | Code | Shared actions (load, fill, jump, undo) returning plain data, used by every surface | done |
-| X32b | P3 | Code | Content-script bridge: side panel talks to the page over a port; in-page panel hides while attached | todo |
+| X32b | P3 | Code | Content-script bridge: side panel talks to the page over a port; in-page panel hides while attached | done |
 | X32c | P3 | Code | Side panel page, `sidePanel` permission, service worker that opens it from the toolbar; tests and e2e | todo |
 | X32d | P3 | Code | Docs: PRIVACY.md, READMEs, CHANGELOG 0.2.0, version bump | todo |
 | X33 | P3 | Code | Structure-based matching (control attributes, order within known sections), then `_locales` for avow's own strings | todo |

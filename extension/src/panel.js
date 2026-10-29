@@ -246,6 +246,12 @@
     $("result").append(el("h4", { text: `${title} (${items.length})` }), ul);
   }
 
+  // While the side panel drives the page, this panel steps aside so there is
+  // one set of controls, not two.
+  avow.setPanelHidden = (hidden) => {
+    host.style.display = hidden ? "none" : "";
+  };
+
   // The host is a manual popover, so the browser puts it in the top layer
   // above anything the Console stacks, with no z-index race. Its own box is
   // reset to nothing; the fixed .panel inside does the positioning. Browsers

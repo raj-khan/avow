@@ -417,5 +417,76 @@ test("undoChanges restores checkboxes and radios, and admits what it cannot", ()
   assert.deepEqual({ ...avow.undoChanges([{ kind: "radio", node: no, prev: null }], control) }, { restored: 0, failed: 1 });
 });
 
+// A fake chrome.runtime and port, enough to drive bridge.js in a vm.
+function bridgeHarness() {
+  let onConnect;
+  const ctx = vm.createContext({
+    document: { documentElement: { lang: "en" } },
+    chrome: { runtime: { id: "avow-id", onConnect: { addListener: (fn) => (onConnect = fn) } } },
+  });
+  const hidden = [];
+  const pageFns = [];
+  vm.runInContext(`globalThis.avow = {
+    manifest: null,
+    load: (text) => { if (text === "bad") throw new Error("Not valid JSON"); avow.manifest = {}; return { app: "x", count: 1, warnings: [] }; },
+    runFill: () => ({ filled: 2 }),
+    jump: (ref) => ref === 0,
+    undo: () => ({ restored: 2 }),
+  };`, ctx);
+  ctx.avow.setPanelHidden = (h) => hidden.push(h);
+  ctx.avow.onPageChange = (fn) => { pageFns.push(fn); return () => pageFns.splice(pageFns.indexOf(fn), 1); };
+  vm.runInContext(readFileSync(join(SRC, "bridge.js"), "utf8"), ctx);
+  const connect = (name = "avow-sidepanel", senderId = "avow-id") => {
+    const sent = [];
+    let onMessage, onDisconnect;
+    onConnect({
+      name,
+      sender: { id: senderId },
+      postMessage: (m) => sent.push(m),
+      onMessage: { addListener: (fn) => (onMessage = fn) },
+      onDisconnect: { addListener: (fn) => (onDisconnect = fn) },
+    });
+    return { sent, send: (m) => onMessage(m), disconnect: () => onDisconnect(), attached: Boolean(onMessage) };
+  };
+  return { connect, hidden, pageFns };
+}
+
+test("bridge answers side panel requests by id and reports errors", () => {
+  const { connect } = bridgeHarness();
+  const port = connect();
+  port.send({ id: 1, type: "load", text: "{}" });
+  port.send({ id: 2, type: "fill" });
+  port.send({ id: 3, type: "load", text: "bad" });
+  port.send({ id: 4, type: "status" });
+  port.send({ id: 5, type: "eval" });
+  const plain = JSON.parse(JSON.stringify(port.sent));
+  assert.deepEqual(plain, [
+    { id: 1, ok: true, value: { app: "x", count: 1, warnings: [] } },
+    { id: 2, ok: true, value: { filled: 2 } },
+    { id: 3, ok: false, error: "Not valid JSON" },
+    { id: 4, ok: true, value: { loaded: true, lang: "en" } },
+    { id: 5, ok: false, error: 'unknown request "eval"' },
+  ]);
+});
+
+test("bridge hides the in-page panel while attached and forwards page changes", () => {
+  const { connect, hidden, pageFns } = bridgeHarness();
+  const a = connect(), b = connect();
+  pageFns.forEach((fn) => fn());
+  assert.deepEqual(JSON.parse(JSON.stringify(a.sent)), [{ type: "pageChanged" }]);
+  a.disconnect();
+  assert.deepEqual(hidden, [true, true], "panel must stay hidden while one side panel is still attached");
+  b.disconnect();
+  assert.deepEqual(hidden, [true, true, false]);
+  assert.equal(pageFns.length, 0);
+});
+
+test("bridge ignores ports from other names or extensions", () => {
+  const { connect, hidden } = bridgeHarness();
+  assert.equal(connect("something-else").attached, false);
+  assert.equal(connect("avow-sidepanel", "another-extension").attached, false);
+  assert.deepEqual(hidden, []);
+});
+
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
 process.exit(failed ? 1 : 0);
