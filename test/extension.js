@@ -378,5 +378,26 @@ test("marks differ by more than colour", () => {
   assert.equal(new Set([filled.tag, left.tag, unknown.tag]).size, 3);
 });
 
+test("undoChanges restores checkboxes and radios, and admits what it cannot", () => {
+  const avow = load("questions.js", "fill.js");
+  // Radios: clicking selects and deselects the rest of its group.
+  const group = [];
+  const radio = () => { const r = { on: false, group }; group.push(r); return r; };
+  const control = {
+    isChecked: (n) => n.on,
+    click: (n) => { if (n.group) n.group.forEach((r) => (r.on = r === n)); else n.on = !n.on; },
+  };
+  const yes = radio(), no = radio();
+  yes.on = true;
+  const box = { on: true };
+  no.on = true; yes.on = false; box.on = false; // the fill's effect
+  const changes = [{ kind: "radio", node: no, prev: yes }, { kind: "checkbox", node: box, before: true }];
+  assert.deepEqual({ ...avow.undoChanges(changes, control) }, { restored: 2, failed: 0 });
+  assert.equal(yes.on, true);
+  assert.equal(no.on, false);
+  assert.equal(box.on, true);
+  assert.deepEqual({ ...avow.undoChanges([{ kind: "radio", node: no, prev: null }], control) }, { restored: 0, failed: 1 });
+});
+
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
 process.exit(failed ? 1 : 0);

@@ -115,6 +115,7 @@
         el("div", { class: "actions" },
           el("button", { id: "pick", type: "button", text: "Pick manifest" }),
           el("button", { id: "fill", type: "button", text: "Fill this page", disabled: true }),
+          el("button", { id: "undo", type: "button", text: "Undo fill", disabled: true }),
         ),
         el("input", { id: "file", type: "file", accept: ".json,application/json", hidden: true }),
         // Live regions exist from the start and only their text changes, which
@@ -205,6 +206,7 @@
     $("result").replaceChildren();
     $("steps").hidden = true;
     $("legend").hidden = false;
+    $("undo").disabled = !avow.canUndo();
     const note = avow.languageNote(document.documentElement.lang);
     if (!report.length) {
       $("summary").textContent = note || "No questions avow knows were found on this page.";
@@ -242,6 +244,7 @@
   // listens, rather than watching the whole page with an observer.
   function pageChanged() {
     avow.clearMarks();
+    $("undo").disabled = true;
     $("result").replaceChildren();
     $("summary").textContent = "";
     $("tally").textContent = "";
@@ -250,6 +253,17 @@
     if (avow.manifest) $("status").textContent = "Page changed. Fill again when this screen is ready.";
   }
   globalThis.navigation?.addEventListener?.("currententrychange", pageChanged);
+
+  $("undo").addEventListener("click", () => {
+    const { restored, failed } = avow.undoFill();
+    $("undo").disabled = true;
+    $("result").replaceChildren();
+    $("tally").textContent = "";
+    $("legend").hidden = true;
+    $("summary").textContent = `Undid ${restored} change${restored === 1 ? "" : "s"}.` +
+      (failed ? ` ${failed} could not be put back by clicking (a radio question that had no answer before, ` +
+        "or a control that ignored the click); check those yourself." : "");
+  });
 
   function section(title, items) {
     if (!items.length) return;

@@ -86,7 +86,7 @@ the report.
 | X24 | P2 | Code | Use `scrollIntoView` with `behavior: "auto"` under `prefers-reduced-motion` | done |
 | X25 | P2 | Code | Empty state as three numbered steps, plus a one-line legend after a fill | done |
 | X26 | P2 | Code | On Navigation API `currententrychange` (when present), clear marks and results and show "Page changed, fill again"; no persistent observer | done |
-| X27 | P2 | Code | Undo: snapshot each touched control's prior state before a fill and offer "Undo fill" through the same click path | todo |
+| X27 | P2 | Code | Undo: snapshot each touched control's prior state before a fill and offer "Undo fill" through the same click path | done |
 | X28 | P2 | Code | Show the panel host with `popover="manual"` and `showPopover()`, and drop the `z-index` hack | todo |
 | X29 | P2 | Code | Opt-in E2E script (`test/e2e.js`, Node 22+, not in `npm test`): Chrome for Testing in new headless mode, CDP `Fetch` serving fixtures under `https://play.google.com/console/`, built-in `WebSocket` | todo |
 | X30 | P2 | Code | `extension/CHANGELOG.md` kept out of the zip; the pack script refuses a version with no changelog heading; tag releases `ext-v*` | todo |

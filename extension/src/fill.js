@@ -73,6 +73,22 @@
     return isChecked(node) === want ? "applied" : "not applied";
   };
 
+  // Undo replays the recorded changes backwards through the same click path.
+  // A checkbox goes back to its old state; a radio goes back by clicking the
+  // option that was selected before. A radio group that had nothing selected
+  // cannot be cleared by clicking, so that one is reported, not faked.
+  avow.undoChanges = (changes, control) => {
+    let restored = 0, failed = 0;
+    for (const c of [...changes].reverse()) {
+      const result = c.kind === "radio"
+        ? (c.prev ? avow.applyChoice(c.prev, true, control) : "not applied")
+        : avow.applyChoice(c.node, c.before, control);
+      if (result === "not applied") failed++;
+      else restored++;
+    }
+    return { restored, failed };
+  };
+
   // What the panel lists after a fill. notSeen covers questions from a form
   // that is on screen but whose question is not: the Console splits Data
   // safety across steps, so these are for the next screen, not errors.
@@ -201,7 +217,11 @@
       const seen = new Set(plan.map((p) => p.key));
       const missing = answer.labels.filter((l) => !seen.has(avow.normalize(l)));
       const ignored = plan
-        .filter(({ option, want }) => avow.applyChoice(option.node, want, control) === "not applied")
+        .filter(({ option, want }) => {
+          const result = avow.applyChoice(option.node, want, control);
+          if (result === "applied") changes.push({ kind: "checkbox", node: option.node, before: !want });
+          return result === "not applied";
+        })
         .map(({ option, want }) => `"${option.label.trim()}" (${want ? "tick" : "untick"})`);
       if (ignored.length) {
         const reason = `the Console ignored avow's click on ${ignored.join(", ")}; set ${ignored.length === 1 ? "it" : "them"} yourself`;
@@ -223,7 +243,18 @@
   }
 
   // Returns what happened to every question on the page, for the panel.
+  // Every control a fill changed, for undo. Replaced by the next fill.
+  let changes = [];
+  avow.undoFill = () => {
+    const result = avow.undoChanges(changes, control);
+    changes = [];
+    avow.clearMarks();
+    return result;
+  };
+  avow.canUndo = () => changes.length > 0;
+
   avow.fillPage = (manifest) => {
+    changes = [];
     avow.clearMarks();
     const report = [];
     for (const { container, options } of groups()) {
@@ -248,7 +279,10 @@
         report.push({ status: "unfilled", question, block, reason });
         continue;
       }
-      if (avow.applyChoice(option.node, true, control) === "not applied") {
+      const prev = options.find((o) => isChecked(o.node))?.node || null;
+      const result = avow.applyChoice(option.node, true, control);
+      if (result === "applied") changes.push({ kind: "radio", node: option.node, prev });
+      if (result === "not applied") {
         const reason = `the Console ignored avow's click on "${answer.label}"; select it yourself`;
         mark(block, "left", reason);
         report.push({ status: "unfilled", question, block, reason });
