@@ -74,7 +74,8 @@ test("APIs newer than Chrome 88 stay feature-detected", () => {
   const m = JSON.parse(readFileSync(join(EXT, "manifest.json"), "utf8"));
   assert.equal(m.minimum_chrome_version, undefined, "minimum_chrome_version set; update this test with the API that needs it");
   assert.match(panel, /typeof host\.showPopover === "function"/, "Popover API (Chrome 114) must be feature-detected");
-  assert.match(panel, /globalThis\.navigation\?\.addEventListener\?\./, "Navigation API (Chrome 102) must be feature-detected");
+  const actions = readFileSync(join(SRC, "actions.js"), "utf8");
+  assert.match(actions, /globalThis\.navigation\?\.addEventListener\?\./, "Navigation API (Chrome 102) must be feature-detected");
   for (const f of readdirSync(SRC)) {
     const code = readFileSync(join(SRC, f), "utf8");
     const newer = code.match(/\b(structuredClone|Object\.hasOwn|findLast|toSorted|toReversed|groupBy)\b|\.at\(|\?\?=|\|\|=|&&=/);
