@@ -11,6 +11,18 @@
   // everything" when it did not.
   avow.SCHEMA_VERSION = 1;
 
+  // A real manifest is a few kilobytes. Anything past this is the wrong file,
+  // and refusing it before reading keeps a huge pick from freezing the tab.
+  avow.MAX_MANIFEST_BYTES = 1024 * 1024;
+
+  avow.checkSize = function (bytes) {
+    if (bytes > avow.MAX_MANIFEST_BYTES) {
+      throw new Error(
+        `That file is ${(bytes / 1024 / 1024).toFixed(1)} MB; an avow manifest is at most 1 MB. Pick store/release-manifest.json.`
+      );
+    }
+  };
+
   avow.readManifest = function (text) {
     let manifest;
     try {

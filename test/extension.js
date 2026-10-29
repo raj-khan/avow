@@ -336,5 +336,11 @@ test("applyChoice reads the control back and never trusts a click", () => {
   assert.equal(avow.applyChoice({ on: false, deaf: true }, true, control), "not applied");
 });
 
+test("checkSize refuses files over 1 MB before they are read", () => {
+  const avow = load("load.js");
+  avow.checkSize(avow.MAX_MANIFEST_BYTES);
+  assert.throws(() => avow.checkSize(avow.MAX_MANIFEST_BYTES + 1), /at most 1 MB/);
+});
+
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
 process.exit(failed ? 1 : 0);

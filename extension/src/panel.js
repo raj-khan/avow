@@ -75,6 +75,7 @@
     if (!file) return;
     $("warnings").replaceChildren();
     try {
+      avow.checkSize(file.size);
       const { manifest, warnings } = avow.readManifest(await file.text());
       avow.manifest = manifest;
       const n = Object.keys(manifest.declarations).length;
