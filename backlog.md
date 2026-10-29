@@ -73,7 +73,7 @@ the report.
 | X11 | P1 | Code | Build the panel with `createElement` and a `<style>` set via `textContent`, then ban `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `eval` and `new Function` in the source test | done |
 | X12 | P1 | Code | Cap manifest file size (for example 1 MB) before `file.text()` in `panel.js` | done |
 | X13 | P1 | Code | `role="status"` on `#status` and `#result`, `role="alert"` on parse errors | done |
-| X14 | P1 | Code | Replace `li.jump` with `<button>`s that scroll to the question and focus its first control | todo |
+| X14 | P1 | Code | Replace `li.jump` with `<button>`s that scroll to the question and focus its first control | done |
 | X15 | P1 | Code | Toggle gets `aria-expanded`, `aria-controls` and a label that switches between Collapse and Expand; Esc collapses the panel | todo |
 | X16 | P1 | Code | Collapse to a pill after a fill, and add a top-right dock toggle held in memory | todo |
 | X17 | P1 | Code | Language guard: if `document.documentElement.lang` is not `en*`, show "English Console only" instead of "no questions found" | todo |
@@ -83,7 +83,7 @@ the report.
 | X21 | P1 | Manual | Test-install the packed CRX and record the exact install warning text; record a short demo video | todo |
 | X22 | P2 | Code | Swap green and yellow for a colorblind-safe pair, and add a small visible text tag to each marked block | todo |
 | X23 | P2 | Code | Move colors to CSS custom properties with a `prefers-color-scheme: dark` block; in `forced-colors`, replace `box-shadow` with a `CanvasText` border; give the panel its own accent | todo |
-| X24 | P2 | Code | Use `scrollIntoView` with `behavior: "auto"` under `prefers-reduced-motion` | todo |
+| X24 | P2 | Code | Use `scrollIntoView` with `behavior: "auto"` under `prefers-reduced-motion` | done |
 | X25 | P2 | Code | Empty state as three numbered steps, plus a one-line legend after a fill | todo |
 | X26 | P2 | Code | On Navigation API `currententrychange` (when present), clear marks and results and show "Page changed, fill again"; no persistent observer | todo |
 | X27 | P2 | Code | Undo: snapshot each touched control's prior state before a fill and offer "Undo fill" through the same click path | todo |
