@@ -73,6 +73,11 @@
         }
       }
     },
+    "permissions": {
+      "type": "object",
+      "description": "Every permission in the merged release manifest, mapped to why the app needs it.",
+      "additionalProperties": { "type": "string", "minLength": 1 }
+    },
     "invariants": {
       "type": "object",
       "description": "Assertions a CI job checks before release.",

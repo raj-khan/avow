@@ -30,9 +30,11 @@ change should be checked against it:
 node src/cli.js check /media/raj/Work1/quran-radio --no-color
 ```
 
-Expected today: 5 pass, 2 warn, 0 fail. The two warnings are real and correct
-(five declarations carry `answer_notes` rather than a `why`; the screenshots
-are genuinely 1:2.233). Do not "fix" them by weakening a rule.
+Expected today: 5 pass, 2 warn, 1 skip, 0 fail. The two warnings are real and
+correct (five declarations carry `answer_notes` rather than a `why`; the
+screenshots are genuinely 1:2.233). The skip is `permissions-inventory`: that
+manifest has no `permissions` map yet. Do not "fix" any of them by weakening a
+rule.
 
 ## Constraints that are deliberate
 
