@@ -26,6 +26,14 @@
   // Colours are tokens so dark mode and forced-colors only swap values. The
   // accent is avow's own indigo, from the icon, so the panel never passes
   // for part of the Console.
+  // Legend swatches take their colour and line style from the marks
+  // themselves, so the two cannot drift apart.
+  const swatch = (kind) => {
+    const m = avow.MARKS[kind];
+    const fill = m.style === "solid" ? `background: ${m.color};` : "";
+    return el("span", { class: "swatch", style: `border: 2px ${m.style} ${m.color}; ${fill}` });
+  };
+
   const style = el("style", { text: `
     .panel {
       --bg: #fff; --fg: #1f1f24; --muted: #5f6368; --line: #dadce0;
@@ -81,6 +89,12 @@
     button.jump { all: unset; cursor: pointer; text-decoration: underline; }
     button.jump:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
     small { color: var(--muted); }
+    #steps { margin: 0 0 6px; padding-left: 20px; }
+    #steps li { margin: 2px 0; }
+    #legend { margin: 0 0 6px; font-size: 12px; color: var(--muted); }
+    .swatch { display: inline-block; width: 10px; height: 10px; margin-left: 4px; vertical-align: -1px;
+      border: 2px solid; border-radius: 2px; }
+
   ` });
 
   root.append(
@@ -105,14 +119,22 @@
         el("input", { id: "file", type: "file", accept: ".json,application/json", hidden: true }),
         // Live regions exist from the start and only their text changes, which
         // is what screen readers need to announce an update.
-        el("div", {
-          id: "status",
-          role: "status",
-          text: "Pick your release-manifest.json. It is read locally and forgotten when you leave the page.",
-        }),
+        // Onboarding without storage: the steps are simply what an empty panel
+        // shows, every time, until the first fill on the page.
+        el("ol", { id: "steps" },
+          el("li", { text: "Pick your release-manifest.json. It is read here and forgotten when you leave the page." }),
+          el("li", { text: "Fill this page. avow ticks the answers your manifest gives." }),
+          el("li", { text: "Review the marked questions, then save in the Console yourself. avow never saves." }),
+        ),
+        el("div", { id: "status", role: "status" }),
         el("div", { id: "error", class: "error", role: "alert" }),
         el("ul", { id: "warnings", class: "warn" }),
         el("p", { id: "summary", role: "status" }),
+        el("p", { id: "legend", hidden: true },
+          swatch("filled"), " filled from your manifest ",
+          swatch("left"), " yours to answer ",
+          swatch("unknown"), " not recognised",
+        ),
         el("div", { id: "result" }),
       ),
     ),
@@ -181,6 +203,8 @@
     const report = avow.fillPage(avow.manifest);
     const { filled, unfilled, unknown, notSeen } = avow.summarize(report);
     $("result").replaceChildren();
+    $("steps").hidden = true;
+    $("legend").hidden = false;
     const note = avow.languageNote(document.documentElement.lang);
     if (!report.length) {
       $("summary").textContent = note || "No questions avow knows were found on this page.";
