@@ -27,7 +27,7 @@ export default {
     "Play blocks the review submission on any missing declaration, but names " +
     "only one at a time, so each omission costs a round trip. This lists them " +
     "all at once.",
-  verify(m) {
+  verify(m, root, { release = false } = {}) {
     const d = m.declarations ?? {};
     const missing = FORMS.filter(([k]) => !d[k]).map(([k, label]) => `${k}: ${label}`);
     const sourced = (s) => Object.entries(d).filter(([, v]) => v.source === s).map(([k]) => k);
@@ -47,6 +47,11 @@ export default {
     if (missing.length || unanswered.length) {
       const detail = [...missing, ...unanswered.map((k) => `${k}: unanswered`)];
       return result(FAIL, this.id, `${detail.length} declaration(s) missing or unanswered`, detail);
+    }
+    // At release time the manifest has to describe what the Console holds, and
+    // a pending answer means it does not.
+    if (release && pending.length) {
+      return result(FAIL, this.id, `${pending.length} declaration(s) not answered in the Console`, pending);
     }
     if (pending.length || unexplained.length) {
       const parts = [];

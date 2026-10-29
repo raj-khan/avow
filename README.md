@@ -31,6 +31,9 @@ avow explain advertising  # why that answer is what it is
 avow forms                # every Console screen, in submission order
 ```
 
+`check --release` also fails on declarations still `planned` or `inherited`,
+since at release time the manifest has to match what the Console holds.
+
 `check` exits non-zero on a failure, so it drops into CI unchanged. Warnings
 do not fail the build: they are for things Play states but does not enforce,
 which should not block a listing Play is willing to accept.

@@ -142,6 +142,13 @@ test("completeness warns on planned and inherited declarations", () => {
   assert.equal(r.detail.length, 2);
 });
 
+test("completeness fails planned and inherited declarations under --release", () => {
+  const m = allForms({ ads: { source: "planned" }, health: { source: "inherited" } });
+  const r = byId.get("completeness").verify(m, ".", { release: true });
+  assert.equal(r.status, "fail");
+  assert.equal(r.detail.length, 2);
+});
+
 test("every rule carries a question, a path and a reason", () => {
   for (const r of rules) {
     assert.ok(r.id && r.question && r.console_path, `${r.id} is missing metadata`);

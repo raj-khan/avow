@@ -17,17 +17,19 @@ function usage() {
 
 Options
   --manifest <path>   default ${DEFAULT_MANIFEST}, relative to the repo
+  --release           planned and inherited declarations fail instead of warn
   --json              machine-readable output
   --no-color
 `);
 }
 
 function parse(argv) {
-  const opts = { positional: [], manifest: DEFAULT_MANIFEST, json: false, color: true };
+  const opts = { positional: [], manifest: DEFAULT_MANIFEST, json: false, color: true, release: false };
   for (let i = 0; i < argv.length; i++) {
     const a = argv[i];
     if (a === "--manifest") opts.manifest = argv[++i];
     else if (a === "--json") opts.json = true;
+    else if (a === "--release") opts.release = true;
     else if (a === "--no-color") opts.color = false;
     else if (a === "-h" || a === "--help") opts.help = true;
     else opts.positional.push(a);
@@ -63,7 +65,7 @@ if (cmd === "check") {
   // must not read as a policy problem.
   const results = rules.map((r) => {
     try {
-      return r.verify(manifest, root);
+      return r.verify(manifest, root, { release: opts.release });
     } catch (e) {
       return { status: "warn", rule: r.id, message: `rule errored: ${e.message}` };
     }
