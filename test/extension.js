@@ -3,7 +3,7 @@ import { join } from "node:path";
 import vm from "node:vm";
 import assert from "node:assert/strict";
 import { FORMS } from "../src/rules/completeness.js";
-import { DATA_TYPES } from "../src/lib/play.js";
+import { DATA_TYPES, PURPOSES } from "../src/lib/play.js";
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -215,9 +215,10 @@ test("data types refuse a manifest value Play does not list", () => {
   assert.match(r.reason, /"telemetry", not an option/);
 });
 
-test("extension data types match the CLI's list exactly", () => {
+test("extension data types and purposes match the CLI's lists exactly", () => {
   const avow = load("questions.js");
   assert.deepEqual([...avow.DATA_TYPES], DATA_TYPES);
+  assert.deepEqual([...avow.PURPOSES], PURPOSES);
 });
 
 // Nodes with headings: { headings: [...], parent }.
@@ -275,6 +276,20 @@ test("ephemeral and required answer from the type's details", () => {
   ];
   assert.equal(avow.pickOption(options, label), options[1]);
   assert.equal(avow.matchQuestion("Is this data required for your app, or can users choose whether it\u2019s collected?"), required);
+});
+
+test("purposes tick from the matching list, refusing off-list values", () => {
+  const avow = load("questions.js", "fill.js");
+  const collectedQ = perType(avow, "Why is this user data collected");
+  const sharedQ = perType(avow, "Why is this user data shared");
+  const m = crashManifest({ collected: true, shared: false, collection_purposes: ["Analytics", "Fraud prevention, security, and compliance"] });
+  const { labels } = avow.answerFor(m, collectedQ, { dataType: "Crash logs" });
+  const options = avow.PURPOSES.map((p) => ({ label: `${p}  Used for something` }));
+  const ticked = avow.planChecks(options, collectedQ, [...labels]).filter((p) => p.want).map((p) => p.option.label);
+  assert.deepEqual([...ticked], ["Analytics  Used for something", "Fraud prevention, security, and compliance  Used for something"]);
+  assert.match(avow.answerFor(m, sharedQ, { dataType: "Crash logs" }).reason, /no answer/);
+  const bad = crashManifest({ collected: true, collection_purposes: ["Telemetry"] });
+  assert.match(avow.answerFor(bad, collectedQ, { dataType: "Crash logs" }).reason, /"Telemetry", not an option/);
 });
 
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);

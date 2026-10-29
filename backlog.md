@@ -48,7 +48,7 @@ tests. Plain MV3, no build step, no dependencies.
 | E10 | Manifest `data_type_details` per data type, and a `data-type-details` CLI rule | done |
 | E11 | Extension: work out which data type a per-type screen is for | done |
 | E12 | Extension: collected/shared, processed ephemerally, required or optional | done |
-| E13 | Extension: collection and sharing purposes, list kept in step with the CLI | todo |
+| E13 | Extension: collection and sharing purposes, list kept in step with the CLI | done |
 | E14 | Docs: per-type screens in extension README, README and ARCHITECTURE.md | todo |
 
 ## Deliberately not taken from v2

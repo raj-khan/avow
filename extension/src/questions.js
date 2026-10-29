@@ -27,6 +27,12 @@
     "Device or other IDs",
   ];
 
+  // The purposes offered per data type; also pinned to src/lib/play.js.
+  avow.PURPOSES = [
+    "App functionality", "Analytics", "Developer communications", "Advertising or marketing",
+    "Fraud prevention, security, and compliance", "Personalization", "Account management",
+  ];
+
   const yesNo = (v) => (v === true ? "Yes" : v === false ? "No" : null);
 
   avow.QUESTIONS = [
@@ -109,6 +115,27 @@
           : t.required === false
             ? "Users can choose whether this data is collected"
             : null,
+    },
+    {
+      // The two purpose questions share their options, so each must be
+      // located by its own sentence; only one shows unless the type is both
+      // collected and shared.
+      form: "data_safety",
+      perType: true,
+      kind: "checkboxes",
+      prefix: true,
+      text: "Why is this user data collected?",
+      options: avow.PURPOSES,
+      answer: (t) => (t.collected && Array.isArray(t.collection_purposes) ? t.collection_purposes : null),
+    },
+    {
+      form: "data_safety",
+      perType: true,
+      kind: "checkboxes",
+      prefix: true,
+      text: "Why is this user data shared?",
+      options: avow.PURPOSES,
+      answer: (t) => (t.shared && Array.isArray(t.sharing_purposes) ? t.sharing_purposes : null),
     },
     {
       // Checkbox questions name every option so the extension can untick
