@@ -11,7 +11,7 @@
   avow.locate = (start, { parent, text }) => {
     for (let node = start; node; node = parent(node)) {
       const t = avow.normalize(text(node));
-      const hits = avow.QUESTIONS.filter((q) => t.includes(avow.normalize(q.text)));
+      const hits = avow.QUESTIONS.filter((q) => avow.shows(q, t));
       if (hits.length === 1) return { question: hits[0], block: node };
       if (hits.length > 1) return null;
     }
@@ -27,6 +27,17 @@
       const l = avow.normalize(o.label);
       return l === want || l.startsWith(`${want} `);
     }) || null;
+  };
+
+  // For a checkbox question: each on-screen option that is one of the
+  // question's own, and whether it should end up ticked. Labels must match
+  // exactly, because "Photos" must not tick "Photos and videos".
+  avow.planChecks = (options, question, labels) => {
+    const own = new Set(question.options.map(avow.normalize));
+    const want = new Set(labels.map(avow.normalize));
+    return options
+      .filter((o) => own.has(avow.normalize(o.label)))
+      .map((o) => ({ option: o, want: want.has(avow.normalize(o.label)) }));
   };
 
   // What the panel lists after a fill. notSeen covers questions from a form
@@ -46,6 +57,8 @@
   // --- DOM ---
 
   const RADIOS = 'input[type="radio"], [role="radio"]';
+  const CHECKBOXES = 'input[type="checkbox"], [role="checkbox"]';
+  const up = { parent: (n) => n.parentElement, text: (n) => n.textContent };
 
   function labelOf(el) {
     if (el.getAttribute("aria-label")) return el.getAttribute("aria-label");
@@ -99,13 +112,49 @@
     marked.clear();
   };
 
-  // Returns what happened to every radio group on the page, for the panel.
+  // Checkboxes that belong to no known checkbox question are left alone and
+  // unreported: consent boxes and filters are everywhere in the Console.
+  function fillCheckboxes(manifest) {
+    const blocks = new Map();
+    for (const el of document.querySelectorAll(CHECKBOXES)) {
+      if (el.closest("#avow-panel-host")) continue;
+      const found = avow.locate(el.parentElement, up);
+      if (!found || found.question.kind !== "checkboxes") continue;
+      if (!blocks.has(found.block)) blocks.set(found.block, { question: found.question, options: [] });
+      blocks.get(found.block).options.push({ node: el, label: labelOf(el) });
+    }
+    const report = [];
+    for (const [block, { question, options }] of blocks) {
+      const answer = avow.answerFor(manifest, question);
+      if (!answer.labels) {
+        mark(block, "#f9ab00", answer.reason);
+        report.push({ status: "unfilled", question, block, reason: answer.reason });
+        continue;
+      }
+      const plan = avow.planChecks(options, question, answer.labels);
+      const seen = new Set(plan.map((p) => avow.normalize(p.option.label)));
+      const missing = answer.labels.filter((l) => !seen.has(avow.normalize(l)));
+      for (const { option, want } of plan) if (isChecked(option.node) !== want) option.node.click();
+      if (missing.length) {
+        const reason = `ticked what was found; no checkbox for ${missing.map((l) => `"${l}"`).join(", ")}`;
+        mark(block, "#f9ab00", reason);
+        report.push({ status: "unfilled", question, block, reason });
+        continue;
+      }
+      const label = answer.labels.join(", ") || "none";
+      mark(block, "#1e8e3e", `ticked ${label} from declarations.${question.form}`);
+      report.push({ status: "filled", question, block, label });
+    }
+    return report;
+  }
+
+  // Returns what happened to every question on the page, for the panel.
   avow.fillPage = (manifest) => {
     avow.clearMarks();
     const report = [];
     for (const { container, options } of groups()) {
-      const found = avow.locate(container, { parent: (n) => n.parentElement, text: (n) => n.textContent });
-      if (!found) {
+      const found = avow.locate(container, up);
+      if (!found || found.question.kind === "checkboxes") {
         const text = container.textContent.replace(/\s+/g, " ").trim().slice(0, 120);
         mark(container, "#f9ab00", "question not in avow's list; answer it yourself", "dashed");
         report.push({ status: "unknown", block: container, text });
@@ -129,6 +178,7 @@
       mark(block, "#1e8e3e", `filled "${answer.label}" from declarations.${question.form}`);
       report.push({ status: "filled", question, block, label: answer.label });
     }
+    report.push(...fillCheckboxes(manifest));
     return report;
   };
 })((globalThis.avow = globalThis.avow || {}));
