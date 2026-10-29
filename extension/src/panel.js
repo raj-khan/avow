@@ -37,8 +37,8 @@
     .error { color: #c5221f; }
     ul { margin: 4px 0; padding-left: 18px; }
     h4 { margin: 10px 0 2px; font-size: 12px; text-transform: uppercase; color: #5f6368; }
-    li.jump { cursor: pointer; }
-    li.jump:hover { text-decoration: underline; }
+    button.jump { all: unset; cursor: pointer; text-decoration: underline; }
+    button.jump:focus-visible { outline: 2px solid #1a73e8; outline-offset: 2px; }
     small { color: #5f6368; }
   ` });
 
@@ -120,6 +120,20 @@
     section("Not seen on this page", notSeen.map((q) => [q.text || q.anchor.join(", "), "may be on the next step of this form"]));
   });
 
+  const CONTROLS = 'input, [role="radio"], [role="checkbox"], select, textarea, button, [tabindex]';
+  function goTo(block) {
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    block.scrollIntoView({ behavior: reduce ? "auto" : "smooth", block: "center" });
+    // The first control that can take focus; failing that, the block itself,
+    // so keyboard users still land on the question rather than staying put.
+    let target = [...block.querySelectorAll(CONTROLS)].find((n) => n.tabIndex >= 0 && !n.disabled);
+    if (!target) {
+      if (!block.hasAttribute("tabindex")) block.setAttribute("tabindex", "-1");
+      target = block;
+    }
+    target.focus({ preventScroll: true });
+  }
+
   function section(title, items) {
     if (!items.length) return;
     const h = document.createElement("h4");
@@ -127,16 +141,16 @@
     const ul = document.createElement("ul");
     for (const [text, note, block] of items) {
       const li = document.createElement("li");
-      li.textContent = text;
-      if (note) {
-        const small = document.createElement("small");
-        small.textContent = ` ${note}`;
-        li.append(small);
-      }
       if (block) {
-        li.className = "jump";
-        li.addEventListener("click", () => block.scrollIntoView({ behavior: "smooth", block: "center" }));
+        // A real button, so the list works from the keyboard; it moves focus
+        // to the question's first control so the answer can be set at once.
+        const jump = el("button", { class: "jump", type: "button", text });
+        jump.addEventListener("click", () => goTo(block));
+        li.append(jump);
+      } else {
+        li.textContent = text;
       }
+      if (note) li.append(el("small", { text: ` ${note}` }));
       ul.append(li);
     }
     $("result").append(h, ul);
