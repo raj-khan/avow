@@ -19,6 +19,16 @@ export const FORMS = [
   ["ai_assets", "AI asset declaration"],
 ];
 
+// Play changes these screens without notice and publishes no feed, so the
+// only honest freshness signal is when they were last seen. Update this, and
+// FORMS, after every real submission that shows a new or reordered screen.
+export const FORMS_OBSERVED = { on: "2026-10-27", during: "a real 1.0 submission" };
+export const FORMS_STALE_DAYS = 90;
+
+export function formsAge(today = new Date()) {
+  return Math.floor((today - new Date(`${FORMS_OBSERVED.on}T00:00:00Z`)) / 86400000);
+}
+
 export default {
   id: "completeness",
   question: "Every declaration Play asks for is present",

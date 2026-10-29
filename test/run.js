@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import assert from "node:assert/strict";
 import { rules, byId } from "../src/rules/index.js";
-import { FORMS } from "../src/rules/completeness.js";
+import { FORMS, FORMS_OBSERVED, formsAge } from "../src/rules/completeness.js";
 import { imageSize } from "../src/lib/imagesize.js";
 import { permissions } from "../src/lib/android.js";
 
@@ -181,6 +181,12 @@ test("schema fails a declaration date that is not YYYY-MM-DD", () => {
     declarations: { ads: { source: "answered", why: "x", answered_on: "27/10/2026" } },
   });
   assert.deepEqual(r.detail, ["$.declarations.ads.answered_on: must be a YYYY-MM-DD date"]);
+});
+
+test("formsAge counts whole days since FORMS was observed", () => {
+  const seen = new Date(`${FORMS_OBSERVED.on}T00:00:00Z`);
+  assert.equal(formsAge(seen), 0);
+  assert.equal(formsAge(new Date(seen.getTime() + 91 * 86400000 + 3600000)), 91);
 });
 
 test("every rule carries a question, a path and a reason", () => {
