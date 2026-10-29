@@ -9,6 +9,7 @@ import { imageSize } from "../src/lib/imagesize.js";
 import { permissions, gradleDependencies, permissionSources } from "../src/lib/android.js";
 import { github } from "../src/lib/report.js";
 import { diffManifests } from "../src/lib/diff.js";
+import { loadManifest } from "../src/lib/manifest.js";
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -418,6 +419,42 @@ test("diffManifests reports added, removed and changed declarations by field", (
     { kind: "added", name: "permissions.android.permission.INTERNET", fields: [] },
   ]);
   assert.deepEqual(diffManifests(after, after), []);
+});
+
+test("loadManifest merges a baseline, the app's own values winning", () => {
+  const dir = repo({
+    "baseline/release-manifest.json": {
+      schema: 1,
+      declarations: {
+        ads: { source: "answered", contains_ads: false, why: "factory policy" },
+        data_safety: { source: "answered", data_types: ["crash logs", "diagnostics"] },
+      },
+    },
+    "app/store/release-manifest.json": {
+      extends: "../../baseline/release-manifest.json",
+      app: { package: "com.example.app" },
+      declarations: { ads: { contains_ads: true, why: "banner on the home screen" }, data_safety: { data_types: [] } },
+    },
+  });
+  const m = loadManifest(join(dir, "app/store/release-manifest.json"));
+  assert.equal(m.extends, undefined);
+  assert.deepEqual(m.declarations, {
+    ads: { source: "answered", contains_ads: true, why: "banner on the home screen" },
+    data_safety: { source: "answered", data_types: [] },
+  });
+  assert.equal(m.schema, 1);
+  rmSync(dir, { recursive: true });
+});
+
+test("loadManifest rejects a missing base and an extends cycle", () => {
+  const dir = repo({
+    "a.json": { extends: "b.json" },
+    "b.json": { extends: "a.json" },
+    "c.json": { extends: "nope.json" },
+  });
+  assert.throws(() => loadManifest(join(dir, "a.json")), /extends cycle/);
+  assert.throws(() => loadManifest(join(dir, "c.json")), /does not exist/);
+  rmSync(dir, { recursive: true });
 });
 
 test("every rule carries a question, a path and a reason", () => {

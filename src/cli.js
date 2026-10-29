@@ -5,6 +5,7 @@ import { rules, byId } from "./rules/index.js";
 import { FORMS, FORMS_OBSERVED, FORMS_STALE_DAYS, formsAge } from "./rules/completeness.js";
 import { print, github } from "./lib/report.js";
 import { diffManifests } from "./lib/diff.js";
+import { loadManifest } from "./lib/manifest.js";
 import { isRepo, revExists, show } from "./lib/git.js";
 
 const DEFAULT_MANIFEST = "store/release-manifest.json";
@@ -59,9 +60,9 @@ function load(root, rel) {
     process.exit(2);
   }
   try {
-    return JSON.parse(readFileSync(path, "utf8"));
+    return loadManifest(path);
   } catch (e) {
-    console.error(`${path} is not valid JSON: ${e.message}`);
+    console.error(e.message);
     process.exit(2);
   }
 }
@@ -136,7 +137,10 @@ if (cmd === "diff") {
     console.error(`Unknown revision "${since}" in ${root}.`);
     process.exit(2);
   }
-  const after = load(root, opts.manifest);
+  // Both sides as written: resolving extends on only the working copy would
+  // report every inherited field as a change.
+  load(root, opts.manifest);
+  const after = JSON.parse(readFileSync(join(root, opts.manifest), "utf8"));
   const old = show(root, since, opts.manifest);
   let before = {};
   if (old !== null) {

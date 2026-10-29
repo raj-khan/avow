@@ -61,6 +61,19 @@ entered), `inherited` (copied from another app, not re-answered), `unanswered`
 or `n/a`. `answered_on` lets `check` notice when the repo changed after the
 answer was given.
 
+## Shared baselines
+
+A team shipping many near-identical apps can keep one baseline and a thin
+manifest per app:
+
+```json
+{ "extends": "../../policy/baseline.json", "app": { "package": "com.example.radio" } }
+```
+
+The path is relative to the manifest. Objects merge with the app's values
+winning; arrays and scalars are replaced whole. `diff` compares the file as
+written and does not resolve `extends`.
+
 ## Rules
 
 | Rule | Checks |

@@ -6,6 +6,10 @@
   "required": ["schema", "app", "declarations"],
   "properties": {
     "schema": { "const": 1 },
+    "extends": {
+      "type": "string",
+      "description": "Path to a baseline manifest, relative to this file. Objects merge, this file wins; arrays and scalars are replaced whole."
+    },
     "updated": { "type": "string", "format": "date" },
     "app": {
       "type": "object",
