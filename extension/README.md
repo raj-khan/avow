@@ -10,6 +10,16 @@ pick. It does not decide anything: the answers come from the manifest, which
 2. **Load unpacked** and choose this `extension/` folder.
 3. Open a Play Console page such as App content > Ads.
 
+## Package for the Chrome Web Store
+
+```sh
+npm run pack:extension   # dist/avow-extension-<version>.zip
+```
+
+The zip holds only `manifest.json`, `src/` and the PNG icons, from the last
+commit; the script refuses to run with uncommitted changes in `extension/`.
+Bump `version` in `manifest.json` for every upload.
+
 ## Use
 
 1. In the avow panel (bottom right), **Pick manifest** and choose your
