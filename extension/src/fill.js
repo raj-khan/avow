@@ -143,11 +143,28 @@
   const isChecked = (el) => el.checked === true || el.getAttribute("aria-checked") === "true";
   const control = { isChecked, click: (el) => el.click() };
 
+  // Blue and orange stay apart for the common colour-vision deficiencies,
+  // solid and dashed survive forced-colors mode, and the text tag says it in
+  // words, so no state depends on colour alone (WCAG 1.4.1).
+  const MARKS = {
+    filled: { color: "#1967d2", style: "solid", tag: "avow: filled" },
+    left: { color: "#e8710a", style: "solid", tag: "avow: yours to answer" },
+    unknown: { color: "#e8710a", style: "dashed", tag: "avow: question not recognised" },
+  };
+  avow.MARKS = MARKS;
+
   const marked = new Set();
-  function mark(block, color, title, style = "solid") {
-    block.style.outline = `3px ${style} ${color}`;
+  function mark(block, kind, title) {
+    const m = MARKS[kind];
+    block.style.outline = `3px ${m.style} ${m.color}`;
     block.style.outlineOffset = "4px";
     if (title) block.title = `avow: ${title}`;
+    const tag = document.createElement("span");
+    tag.setAttribute("data-avow-tag", "");
+    tag.textContent = m.tag;
+    tag.style.cssText = `display: inline-block; margin: 0 0 4px; padding: 1px 6px; border-radius: 4px; ` +
+      `font: 600 11px/1.6 system-ui, sans-serif; color: #fff; background: ${m.color};`;
+    block.prepend(tag);
     marked.add(block);
   }
 
@@ -156,6 +173,7 @@
       b.style.outline = "";
       b.style.outlineOffset = "";
       if (b.title.startsWith("avow: ")) b.title = "";
+      for (const t of b.querySelectorAll(":scope > [data-avow-tag]")) t.remove();
     }
     marked.clear();
   };
@@ -175,7 +193,7 @@
     for (const [block, { question, options }] of blocks) {
       const answer = avow.answerFor(manifest, question, contextFor(question, block));
       if (!answer.labels) {
-        mark(block, "#f9ab00", answer.reason);
+        mark(block, "left", answer.reason);
         report.push({ status: "unfilled", question, block, reason: answer.reason });
         continue;
       }
@@ -187,18 +205,18 @@
         .map(({ option, want }) => `"${option.label.trim()}" (${want ? "tick" : "untick"})`);
       if (ignored.length) {
         const reason = `the Console ignored avow's click on ${ignored.join(", ")}; set ${ignored.length === 1 ? "it" : "them"} yourself`;
-        mark(block, "#f9ab00", reason);
+        mark(block, "left", reason);
         report.push({ status: "unfilled", question, block, reason });
         continue;
       }
       if (missing.length) {
         const reason = `ticked what was found; no checkbox for ${missing.map((l) => `"${l}"`).join(", ")}`;
-        mark(block, "#f9ab00", reason);
+        mark(block, "left", reason);
         report.push({ status: "unfilled", question, block, reason });
         continue;
       }
       const label = answer.labels.join(", ") || "none";
-      mark(block, "#1e8e3e", `ticked ${label} from declarations.${question.form}`);
+      mark(block, "filled", `ticked ${label} from declarations.${question.form}`);
       report.push({ status: "filled", question, block, label });
     }
     return report;
@@ -212,31 +230,31 @@
       const found = avow.locate(container, up);
       if (!found || found.question.kind === "checkboxes") {
         const text = container.textContent.replace(/\s+/g, " ").trim().slice(0, 120);
-        mark(container, "#f9ab00", "question not in avow's list; answer it yourself", "dashed");
+        mark(container, "unknown", "question not in avow's list; answer it yourself");
         report.push({ status: "unknown", block: container, text });
         continue;
       }
       const { question, block } = found;
       const answer = avow.answerFor(manifest, question, contextFor(question, block));
       if (!answer.label) {
-        mark(block, "#f9ab00", answer.reason);
+        mark(block, "left", answer.reason);
         report.push({ status: "unfilled", question, block, reason: answer.reason });
         continue;
       }
       const option = avow.pickOption(options, answer.label);
       if (!option) {
         const reason = `no "${answer.label}" option found next to this question`;
-        mark(block, "#f9ab00", reason);
+        mark(block, "left", reason);
         report.push({ status: "unfilled", question, block, reason });
         continue;
       }
       if (avow.applyChoice(option.node, true, control) === "not applied") {
         const reason = `the Console ignored avow's click on "${answer.label}"; select it yourself`;
-        mark(block, "#f9ab00", reason);
+        mark(block, "left", reason);
         report.push({ status: "unfilled", question, block, reason });
         continue;
       }
-      mark(block, "#1e8e3e", `filled "${answer.label}" from declarations.${question.form}`);
+      mark(block, "filled", `filled "${answer.label}" from declarations.${question.form}`);
       report.push({ status: "filled", question, block, label: answer.label });
     }
     report.push(...fillCheckboxes(manifest));

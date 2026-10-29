@@ -156,7 +156,7 @@
     // Nothing left to do: get out of the way so the Save bar is free.
     if (!left) avow.setCollapsed(true);
     $("summary").textContent = `Filled ${filled.length}, left ${left} for you. ` +
-      "Everything outlined yellow is yours to answer. Review the page, then save in the Console.";
+      "Everything outlined orange is yours to answer. Review the page, then save in the Console.";
     section("Left for you", unfilled.map((r) => [r.question.text || r.question.form, r.reason, r.block]));
     section("Not in avow's question list", unknown.map((r) => [r.text, "", r.block]));
     section("Not seen on this page", notSeen.map((q) => [q.text || q.anchor.join(", "), "may be on the next step of this form"]));

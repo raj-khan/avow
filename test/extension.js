@@ -370,5 +370,13 @@ test("the sample manifest passes the CLI's schema and data safety rules", () => 
   }
 });
 
+test("marks differ by more than colour", () => {
+  const avow = load("questions.js", "fill.js");
+  const { filled, left, unknown } = avow.MARKS;
+  assert.notEqual(filled.color, left.color);
+  assert.notEqual(left.style, unknown.style);
+  assert.equal(new Set([filled.tag, left.tag, unknown.tag]).size, 3);
+});
+
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
 process.exit(failed ? 1 : 0);
