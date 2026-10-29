@@ -117,7 +117,8 @@ it. No dependencies, Node 20+.
 ## Browser extension
 
 `extension/` fills Play Console declarations (yes/no, App access, Target
-audience, Data safety data types) from the same manifest, outlines anything it
+audience, and Data safety down to each data type's purposes) from the same
+manifest, outlines anything it
 left for you, and never saves. See
 `extension/README.md`.
 

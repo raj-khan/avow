@@ -153,10 +153,10 @@ because an invariant guarding a number nobody reads is decoration.
 - **The Chrome extension: confirm and widen.** The first version is in
   `extension/` (see its README): no permissions, picks a manifest, fills
   yes/no, option-text and checkbox questions (App access, Ads, Advertising ID,
-  Target audience, Data safety first step and data types, News, Government),
-  never saves, outlines what it left. Next: confirm the wording during a real
-  submission and set `QUESTIONS_OBSERVED`, then the per-data-type Data safety
-  screens. The three non-negotiables still hold: match on question text, never
+  Target audience, all of Data safety including the per-type screens, News,
+  Government), never saves, outlines what it left. Next: confirm the wording
+  during a real submission and set `QUESTIONS_OBSERVED`, then Content ratings.
+  The three non-negotiables still hold: match on question text, never
   auto-submit, no credentials or network.
 - **App Store Connect.** The same problem exists on iOS: privacy nutrition
   labels, encryption export compliance, content rights, age rating. Larger
