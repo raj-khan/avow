@@ -45,11 +45,32 @@ export function permissions(xml) {
   return [...out].sort();
 }
 
+const GRADLE_FILES = [
+  "android/app/build.gradle", "android/app/build.gradle.kts",
+  "app/build.gradle", "app/build.gradle.kts",
+];
+const GRADLE_CONFIGS = "implementation|api|compileOnly|runtimeOnly|releaseImplementation";
+
+// "group:artifact" for every quoted Maven coordinate in a dependency line.
+// Version catalogs and project() references are skipped: they name no
+// artifact here, and guessing would make data-safety lie.
+export function gradleDependencies(text) {
+  const out = new Set();
+  const line = new RegExp(`^\\s*(?:${GRADLE_CONFIGS})\\b[\\s(]*["']([^"':]+):([^"':]+)`, "gm");
+  for (const m of text.matchAll(line)) out.add(`${m[1]}:${m[2]}`);
+  return [...out];
+}
+
 export function dependencies(root) {
+  const out = [];
   try {
     const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
-    return Object.keys({ ...pkg.dependencies, ...pkg.devDependencies });
-  } catch {
-    return [];
+    out.push(...Object.keys({ ...pkg.dependencies, ...pkg.devDependencies }));
+  } catch {}
+  for (const rel of GRADLE_FILES) {
+    try {
+      out.push(...gradleDependencies(readFileSync(join(root, rel), "utf8")));
+    } catch {}
   }
+  return [...new Set(out)];
 }

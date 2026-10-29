@@ -8,6 +8,8 @@ const TRACKING = [
   "segment", "posthog", "appsflyer", "adjust", "branch-sdk", "firebase-perf",
   "facebook-sdk", "react-native-fbsdk", "admob", "google-mobile-ads",
   "onesignal", "clevertap", "datadog",
+  // Gradle coordinates for native apps that never touch package.json.
+  "play-services-ads", "facebook-android-sdk", "facebook-core",
 ];
 
 export default {

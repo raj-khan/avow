@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { rules, byId } from "../src/rules/index.js";
 import { FORMS, FORMS_OBSERVED, formsAge } from "../src/rules/completeness.js";
 import { imageSize } from "../src/lib/imagesize.js";
-import { permissions } from "../src/lib/android.js";
+import { permissions, gradleDependencies } from "../src/lib/android.js";
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -86,6 +86,34 @@ test("data-safety passes on a clean dependency tree", () => {
   const r = byId.get("data-safety").verify(
     { declarations: { data_safety: { collects_user_data: false, shares_user_data: false } } }, dir);
   assert.equal(r.status, "pass");
+  rmSync(dir, { recursive: true });
+});
+
+test("gradleDependencies reads quoted coordinates in both DSLs", () => {
+  const gradle = [
+    'implementation("com.facebook.react:react-android")',
+    "    implementation 'com.google.firebase:firebase-analytics:22.1.0'",
+    '    api "com.squareup.okhttp3:okhttp:4.12.0"',
+    "    implementation jscFlavor",
+    "    implementation project(':lib')",
+    "    implementation libs.androidx.core",
+  ].join("\n");
+  assert.deepEqual(gradleDependencies(gradle), [
+    "com.facebook.react:react-android",
+    "com.google.firebase:firebase-analytics",
+    "com.squareup.okhttp3:okhttp",
+  ]);
+});
+
+test("data-safety fails on a tracking SDK added in build.gradle", () => {
+  const dir = repo({
+    "package.json": { dependencies: { expo: "^54" } },
+    "android/app/build.gradle": "dependencies {\n  implementation 'com.google.android.gms:play-services-ads:23.0.0'\n}",
+  });
+  const r = byId.get("data-safety").verify(
+    { declarations: { data_safety: { collects_user_data: false, shares_user_data: false } } }, dir);
+  assert.equal(r.status, "fail");
+  assert.deepEqual(r.detail, ["com.google.android.gms:play-services-ads"]);
   rmSync(dir, { recursive: true });
 });
 
