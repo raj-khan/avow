@@ -28,6 +28,7 @@ each, and fails CI when the file contradicts the code.
 avow init                 # write a starter manifest
 avow check                # verify it against this repo
 avow explain advertising  # why that answer is what it is
+avow diff --since main    # which declarations this branch changes
 avow forms                # every Console screen, in submission order
 ```
 
