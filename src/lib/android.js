@@ -39,6 +39,40 @@ export function mergedManifest(root) {
   return null;
 }
 
+const MERGER_LOGS = "android/app/build/outputs/logs";
+
+// The manifest-merger report names the library behind every merged element.
+// Returns Map<permission, string[]>: library coordinates, or "your
+// AndroidManifest.xml" when only the app's own manifest adds it. Empty when
+// no release build has produced a report.
+export function permissionSources(root) {
+  let name;
+  try {
+    name = readdirSync(join(root, MERGER_LOGS)).find((f) => /^manifest-merger-.*release.*-report\.txt$/.test(f));
+  } catch {}
+  const out = new Map();
+  if (!name) return out;
+  let current = null;
+  for (const line of readFileSync(join(root, MERGER_LOGS, name), "utf8").split("\n")) {
+    const head = line.match(/^uses-permission(?:-sdk-23)?#(\S+)/);
+    if (head) {
+      current = head[1];
+      out.set(current, []);
+      continue;
+    }
+    // Element-level ADDED/MERGED lines are unindented; attribute lines are
+    // tab-indented and repeat the same sources.
+    if (!current || !/^(ADDED|MERGED) from /.test(line)) {
+      if (line && !/^\s/.test(line)) current = null;
+      continue;
+    }
+    const lib = line.match(/^\w+ from \[([^\]]+)\]/);
+    const src = lib ? lib[1] : "the app's AndroidManifest.xml";
+    if (!out.get(current).includes(src)) out.get(current).push(src);
+  }
+  return out;
+}
+
 export function permissions(xml) {
   const out = new Set();
   for (const m of xml.matchAll(/<uses-permission[^>]*android:name="([^"]+)"/g)) out.add(m[1]);
