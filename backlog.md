@@ -72,7 +72,7 @@ the report.
 | X10 | P0 | Manual | Fill the Privacy practices tab: single-purpose sentence, "No remote code", no data types, certifications ticked, privacy policy URL | todo |
 | X11 | P1 | Code | Build the panel with `createElement` and a `<style>` set via `textContent`, then ban `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `eval` and `new Function` in the source test | done |
 | X12 | P1 | Code | Cap manifest file size (for example 1 MB) before `file.text()` in `panel.js` | done |
-| X13 | P1 | Code | `role="status"` on `#status` and `#result`, `role="alert"` on parse errors | todo |
+| X13 | P1 | Code | `role="status"` on `#status` and `#result`, `role="alert"` on parse errors | done |
 | X14 | P1 | Code | Replace `li.jump` with `<button>`s that scroll to the question and focus its first control | todo |
 | X15 | P1 | Code | Toggle gets `aria-expanded`, `aria-controls` and a label that switches between Collapse and Expand; Esc collapses the panel | todo |
 | X16 | P1 | Code | Collapse to a pill after a fill, and add a top-right dock toggle held in memory | todo |

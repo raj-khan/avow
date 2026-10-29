@@ -53,11 +53,16 @@
       ),
       el("div", { class: "body" },
         el("input", { id: "file", type: "file", accept: ".json,application/json", hidden: true }),
+        // Live regions exist from the start and only their text changes, which
+        // is what screen readers need to announce an update.
         el("div", {
           id: "status",
+          role: "status",
           text: "Pick your release-manifest.json. It is read locally and forgotten when you leave the page.",
         }),
+        el("div", { id: "error", class: "error", role: "alert" }),
         el("ul", { id: "warnings", class: "warn" }),
+        el("p", { id: "summary", role: "status" }),
         el("div", { id: "result" }),
       ),
     ),
@@ -74,12 +79,14 @@
     $("file").value = "";
     if (!file) return;
     $("warnings").replaceChildren();
+    $("error").textContent = "";
+    $("summary").textContent = "";
+    $("result").replaceChildren();
     try {
       avow.checkSize(file.size);
       const { manifest, warnings } = avow.readManifest(await file.text());
       avow.manifest = manifest;
       const n = Object.keys(manifest.declarations).length;
-      $("status").className = "";
       $("status").textContent = `${manifest.app?.package || file.name}: ${n} declarations loaded.`;
       for (const w of warnings) {
         const li = document.createElement("li");
@@ -90,8 +97,8 @@
     } catch (e) {
       avow.manifest = null;
       $("fill").disabled = true;
-      $("status").className = "error";
-      $("status").textContent = e.message;
+      $("status").textContent = "No manifest loaded.";
+      $("error").textContent = e.message;
     }
   });
 
@@ -103,13 +110,11 @@
     const { filled, unfilled, unknown, notSeen } = avow.summarize(report);
     $("result").replaceChildren();
     if (!report.length) {
-      $("result").textContent = "No questions avow knows were found on this page.";
+      $("summary").textContent = "No questions avow knows were found on this page.";
       return;
     }
-    const line = document.createElement("p");
-    line.textContent = `Filled ${filled.length}. Everything outlined yellow is yours to answer. ` +
-      "Review the page, then save in the Console.";
-    $("result").append(line);
+    $("summary").textContent = `Filled ${filled.length}, left ${unfilled.length + unknown.length} for you. ` +
+      "Everything outlined yellow is yours to answer. Review the page, then save in the Console.";
     section("Left for you", unfilled.map((r) => [r.question.text || r.question.form, r.reason, r.block]));
     section("Not in avow's question list", unknown.map((r) => [r.text, "", r.block]));
     section("Not seen on this page", notSeen.map((q) => [q.text || q.anchor.join(", "), "may be on the next step of this form"]));
