@@ -9,6 +9,24 @@
 (function (avow) {
   avow.QUESTIONS_OBSERVED = null;
 
+  // Play's data type labels. src/lib/play.js holds the CLI's copy and a test
+  // keeps the two identical.
+  avow.DATA_TYPES = [
+    "Approximate location", "Precise location",
+    "Name", "Email address", "User IDs", "Address", "Phone number", "Race and ethnicity",
+    "Political or religious beliefs", "Sexual orientation", "Other info",
+    "User payment info", "Purchase history", "Credit score", "Other financial info",
+    "Health info", "Fitness info",
+    "Emails", "SMS or MMS", "Other in-app messages",
+    "Photos", "Videos",
+    "Voice or sound recordings", "Music files", "Other audio files",
+    "Files and docs", "Calendar events", "Contacts",
+    "App interactions", "In-app search history", "Installed apps", "Other user-generated content", "Other actions",
+    "Web browsing history",
+    "Crash logs", "Diagnostics", "Other app performance data",
+    "Device or other IDs",
+  ];
+
   const yesNo = (v) => (v === true ? "Yes" : v === false ? "No" : null);
 
   avow.QUESTIONS = [
@@ -58,21 +76,7 @@
       form: "data_safety",
       kind: "checkboxes",
       anchor: ["Approximate location", "Crash logs"],
-      options: [
-        "Approximate location", "Precise location",
-        "Name", "Email address", "User IDs", "Address", "Phone number", "Race and ethnicity",
-        "Political or religious beliefs", "Sexual orientation", "Other info",
-        "User payment info", "Purchase history", "Credit score", "Other financial info",
-        "Health info", "Fitness info",
-        "Emails", "SMS or MMS", "Other in-app messages",
-        "Photos", "Videos",
-        "Voice or sound recordings", "Music files", "Other audio files",
-        "Files and docs", "Calendar events", "Contacts",
-        "App interactions", "In-app search history", "Installed apps", "Other user-generated content", "Other actions",
-        "Web browsing history",
-        "Crash logs", "Diagnostics", "Other app performance data",
-        "Device or other IDs",
-      ],
+      options: avow.DATA_TYPES,
       answer: (d) => (Array.isArray(d.data_types) ? d.data_types : null),
     },
     {
@@ -121,13 +125,23 @@
   // The option label to select, or a reason it cannot be filled. Only
   // answered and planned declarations fill: inherited ones were answered for
   // another app, and unanswered ones have no answer.
-  avow.answerFor = (manifest, question) => {
+  // Per-type questions (perType: true) are asked once for every data type, so
+  // their answer comes from data_type_details for the type on screen, which
+  // the caller works out and passes as context.dataType.
+  avow.answerFor = (manifest, question, context = {}) => {
     const d = manifest.declarations?.[question.form];
     if (!d) return { reason: `declarations.${question.form} is not in the manifest` };
     if (d.source !== "answered" && d.source !== "planned") {
       return { reason: `declarations.${question.form} is ${d.source || "missing a source"}` };
     }
-    const value = question.answer(d);
+    let subject = d;
+    if (question.perType) {
+      const type = context.dataType;
+      if (!type) return { reason: "could not tell which data type this screen is for" };
+      subject = d.data_type_details?.[type];
+      if (!subject) return { reason: `no data_type_details entry for "${type}"` };
+    }
+    const value = question.answer(subject);
     if (!value) return { reason: `declarations.${question.form} has no answer for this question` };
     if (question.kind !== "checkboxes") return { label: value };
     const known = new Set(question.options.map(avow.normalize));
