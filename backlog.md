@@ -22,7 +22,7 @@ Status: `todo`, `done`.
 | 10 | `permissions-inventory` rule: every merged permission accounted for, with its library | 6 | done |
 | 11 | `content-rating` rule: result recorded, dated and explained | 6 | done |
 | 12 | `stale-declarations` rule: dependency or claim files changed after `answered_on`, or answer older than 6 months | 6 | done |
-| 13 | `listing-limits` warns on URLs, phone numbers, emoji and unqualified superlatives in the title | 5 | todo |
+| 13 | `listing-limits` warns on URLs, phone numbers, emoji and unqualified superlatives in the title | 5 | done |
 | 14 | `--format github` emits Actions annotations | 11 Phase 1 | todo |
 | 15 | `avow diff`: declarations changed since a git revision | 11 Phase 2 | todo |
 | 16 | `extends`: a manifest inherits a shared baseline, per-app overrides win | 11 Phase 4 | todo |
