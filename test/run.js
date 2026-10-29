@@ -181,6 +181,39 @@ test("data-safety fails on a tracking SDK added in build.gradle", () => {
   rmSync(dir, { recursive: true });
 });
 
+const rated = (over) => ({
+  declarations: {
+    content_rating: {
+      source: "answered",
+      answers: { violence: false },
+      answer_notes: { violence: "No violent content." },
+      result: "PEGI 3, ESRB Everyone",
+      answered_on: "2026-10-27",
+      ...over,
+    },
+  },
+});
+
+test("content-rating passes a complete, dated record", () => {
+  assert.equal(byId.get("content-rating").verify(rated()).status, "pass");
+});
+
+test("content-rating warns on an unexplained answer, a missing result and no date", () => {
+  const r = byId.get("content-rating").verify(
+    rated({ answer_notes: {}, result: undefined, expected_rating: "Everyone", answered_on: undefined }));
+  assert.equal(r.status, "warn");
+  assert.deepEqual(r.detail, [
+    "answers.violence: no entry in answer_notes",
+    'result: not recorded (only expected_rating "Everyone")',
+    "answered_on: the questionnaire is not dated",
+  ]);
+});
+
+test("content-rating skips until the questionnaire is answered", () => {
+  assert.equal(byId.get("content-rating").verify(rated({ source: "planned" })).status, "skip");
+  assert.equal(byId.get("content-rating").verify({ declarations: {} }).status, "skip");
+});
+
 test("listing-limits fails an over-long title", () => {
   const r = byId.get("listing-limits").verify({ listing: { title: "x".repeat(31) } });
   assert.equal(r.status, "fail");
