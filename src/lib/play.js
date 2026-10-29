@@ -16,3 +16,9 @@ export const DATA_TYPES = [
   "Crash logs", "Diagnostics", "Other app performance data",
   "Device or other IDs",
 ];
+
+// The purposes offered for each collected or shared data type.
+export const PURPOSES = [
+  "App functionality", "Analytics", "Developer communications", "Advertising or marketing",
+  "Fraud prevention, security, and compliance", "Personalization", "Account management",
+];

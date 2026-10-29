@@ -56,6 +56,18 @@ Each entry under `declarations` records one Console form:
 }
 ```
 
+Data safety records the per-type answers too, using Play's labels:
+
+```json
+"data_types": ["Crash logs"],
+"data_type_details": {
+  "Crash logs": {
+    "collected": true, "shared": false, "ephemeral": false, "required": true,
+    "collection_purposes": ["Analytics"]
+  }
+}
+```
+
 `source` is `answered` (entered in the Console), `planned` (decided, not
 entered), `inherited` (copied from another app, not re-answered), `unanswered`
 or `n/a`. `answered_on` lets `check` notice when the repo changed after the
@@ -84,6 +96,7 @@ written and does not resolve `extends`.
 | `permissions-inventory` | every merged permission is listed under `permissions`, with the library that added it |
 | `data-safety` | "no collection" against analytics, crash, attribution and ad SDKs in `package.json` and Gradle |
 | `data-types` | Data safety data types are on Play's list, spelled its way, and agree with the collection answer |
+| `data-type-details` | every data type has collected/shared, ephemeral, required and purpose answers, consistent with the top-level ones |
 | `content-rating` | each IARC answer has a note, and the issued rating is recorded and dated |
 | `listing-limits` | copy against Play's character caps; emoji, URLs and rankings in the title |
 | `assets` | icon, feature graphic and screenshot dimensions, bytes, aspect ratio and count |
