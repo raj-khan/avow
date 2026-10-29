@@ -5,7 +5,7 @@ import assert from "node:assert/strict";
 import { rules, byId } from "../src/rules/index.js";
 import { FORMS, FORMS_OBSERVED, formsAge } from "../src/rules/completeness.js";
 import { imageSize } from "../src/lib/imagesize.js";
-import { permissions, gradleDependencies } from "../src/lib/android.js";
+import { permissions, gradleDependencies, permissionSources } from "../src/lib/android.js";
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -45,6 +45,38 @@ test("advertising-id fails on a no with AD_ID present", () => {
   const r = byId.get("advertising-id").verify(
     { declarations: { advertising_id: { uses_advertising_id: false } } }, dir);
   assert.equal(r.status, "fail");
+  rmSync(dir, { recursive: true });
+});
+
+const MERGER_REPORT = "android/app/build/outputs/logs/manifest-merger-release-report.txt";
+const mergerReport = [
+  "uses-permission#android.permission.INTERNET",
+  "ADDED from /repo/android/app/src/main/AndroidManifest.xml:6:3-64",
+  "MERGED from [host.exp.exponent:expo.modules.filesystem:57.0.7] /cache/AndroidManifest.xml:8:5-67",
+  "\tandroid:name",
+  "\t\tADDED from /repo/android/app/src/main/AndroidManifest.xml:6:20-62",
+  `uses-permission#${AD_ID}`,
+  "ADDED from [com.google.android.gms:play-services-measurement-api:21.5.0] /cache/AndroidManifest.xml:25:5-79",
+  "application",
+  "ADDED from /repo/android/app/src/main/AndroidManifest.xml:10:3-30:17",
+].join("\n");
+
+test("permissionSources attributes each permission to its libraries", () => {
+  const dir = repo({ [MERGER_REPORT]: mergerReport });
+  const s = permissionSources(dir);
+  assert.deepEqual(s.get("android.permission.INTERNET"),
+    ["the app's AndroidManifest.xml", "host.exp.exponent:expo.modules.filesystem:57.0.7"]);
+  assert.deepEqual(s.get(AD_ID), ["com.google.android.gms:play-services-measurement-api:21.5.0"]);
+  assert.equal(s.size, 2);
+  rmSync(dir, { recursive: true });
+});
+
+test("advertising-id names the library that added AD_ID", () => {
+  const dir = repo({ [MERGED]: manifestXml([AD_ID]), [MERGER_REPORT]: mergerReport });
+  const r = byId.get("advertising-id").verify(
+    { declarations: { advertising_id: { uses_advertising_id: false } } }, dir);
+  assert.equal(r.status, "fail");
+  assert.equal(r.detail[1], "added by com.google.android.gms:play-services-measurement-api:21.5.0");
   rmSync(dir, { recursive: true });
 });
 

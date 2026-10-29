@@ -1,4 +1,4 @@
-import { mergedManifest, permissions } from "../lib/android.js";
+import { mergedManifest, permissions, permissionSources } from "../lib/android.js";
 import { result, PASS, FAIL, SKIP } from "../lib/report.js";
 
 const AD_ID = "com.google.android.gms.permission.AD_ID";
@@ -29,13 +29,14 @@ export default {
         `declared ${declared}, AD_ID permission ${present ? "present" : "absent"}`
       );
     }
+    const from = permissionSources(root).get(AD_ID) ?? [];
     return result(
       FAIL,
       this.id,
       declared
         ? "declared as used, but AD_ID is absent from the merged manifest"
         : "declared as unused, but AD_ID is present in the merged manifest",
-      [merged.path]
+      [merged.path, ...from.map((s) => `added by ${s}`)]
     );
   },
 };
