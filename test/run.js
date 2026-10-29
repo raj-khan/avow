@@ -104,6 +104,38 @@ test("advertising-id skips when no release build exists", () => {
   rmSync(dir, { recursive: true });
 });
 
+test("permissions-inventory passes when every permission is accounted for", () => {
+  const dir = repo({ [MERGED]: manifestXml(["android.permission.INTERNET"]) });
+  const r = byId.get("permissions-inventory").verify(
+    { permissions: { "android.permission.INTERNET": "streams audio" } }, dir);
+  assert.equal(r.status, "pass");
+  rmSync(dir, { recursive: true });
+});
+
+test("permissions-inventory warns on unaccounted and stale permissions", () => {
+  const dir = repo({
+    [MERGED]: manifestXml(["android.permission.INTERNET", AD_ID]),
+    [MERGER_REPORT]: mergerReport,
+  });
+  const r = byId.get("permissions-inventory").verify(
+    { permissions: { "android.permission.INTERNET": "streams audio", "android.permission.CAMERA": "scan" } }, dir);
+  assert.equal(r.status, "warn");
+  assert.deepEqual(r.detail, [
+    `${AD_ID}: unaccounted, added by com.google.android.gms:play-services-measurement-api:21.5.0`,
+    "android.permission.CAMERA: accounted for, but not in the merged manifest",
+  ]);
+  rmSync(dir, { recursive: true });
+});
+
+test("permissions-inventory skips without a build or an inventory", () => {
+  const empty = repo({ "package.json": {} });
+  assert.equal(byId.get("permissions-inventory").verify({ permissions: {} }, empty).status, "skip");
+  const built = repo({ [MERGED]: manifestXml(["android.permission.INTERNET"]) });
+  assert.equal(byId.get("permissions-inventory").verify({}, built).status, "skip");
+  rmSync(empty, { recursive: true });
+  rmSync(built, { recursive: true });
+});
+
 test("data-safety fails when a tracking SDK is installed", () => {
   const dir = repo({ "package.json": { dependencies: { "@sentry/react-native": "^5" } } });
   const r = byId.get("data-safety").verify(
