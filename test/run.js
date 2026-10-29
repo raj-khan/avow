@@ -1,5 +1,6 @@
-import { mkdtempSync, writeFileSync, mkdirSync, rmSync } from "node:fs";
+import { mkdtempSync, writeFileSync, mkdirSync, rmSync, existsSync } from "node:fs";
 import { tmpdir } from "node:os";
+import { execFileSync } from "node:child_process";
 import { join } from "node:path";
 import assert from "node:assert/strict";
 import { rules, byId } from "../src/rules/index.js";
@@ -236,6 +237,56 @@ test("claims fails when a pinned number is absent from the copy", () => {
     invariants: { count: { claimed: 3, source_of_truth: "dist/catalogue.json" } },
   }, dir);
   assert.equal(r.status, "fail");
+  rmSync(dir, { recursive: true });
+});
+
+// Commits every file in `dir` with the given date, so history is deterministic.
+function commit(dir, date) {
+  const env = { ...process.env, GIT_AUTHOR_DATE: `${date}T12:00:00Z`, GIT_COMMITTER_DATE: `${date}T12:00:00Z` };
+  const g = (...a) => execFileSync("git", ["-C", dir, "-c", "user.name=t", "-c", "user.email=t@t", ...a], { env, stdio: "ignore" });
+  if (!existsSync(join(dir, ".git"))) g("init", "-q");
+  g("add", "-A");
+  g("commit", "-qm", date);
+}
+
+const TODAY = new Date("2026-10-29T00:00:00Z");
+
+test("stale-declarations warns when dependencies changed after the answer", () => {
+  const dir = repo({ "package.json": { dependencies: {} }, "dist/c.json": [1] });
+  commit(dir, "2026-10-20");
+  writeFileSync(join(dir, "package.json"), JSON.stringify({ dependencies: { "@sentry/react-native": "5" } }));
+  commit(dir, "2026-10-25");
+  const r = byId.get("stale-declarations").verify({
+    declarations: { data_safety: { source: "answered", answered_on: "2026-10-22" } },
+    invariants: { n: { source_of_truth: "dist/c.json", verified: "2026-10-21" } },
+  }, dir, { today: TODAY });
+  assert.equal(r.status, "warn");
+  assert.deepEqual(r.detail, ["data_safety: answered 2026-10-22, package.json changed 2026-10-25; review"]);
+  rmSync(dir, { recursive: true });
+});
+
+test("stale-declarations warns on an old answer and an uncommitted data change", () => {
+  const dir = repo({ "dist/c.json": [1] });
+  commit(dir, "2026-01-10");
+  writeFileSync(join(dir, "dist/c.json"), "[1,2]");
+  const r = byId.get("stale-declarations").verify({
+    declarations: { news_app: { source: "answered", answered_on: "2026-03-01" } },
+    invariants: { n: { source_of_truth: "dist/c.json", verified: "2026-10-01" } },
+  }, dir, { today: TODAY });
+  assert.deepEqual(r.detail, [
+    "news_app: answered 2026-03-01, over 182 days ago; re-verify",
+    "invariants.n: verified 2026-10-01, dist/c.json changed 2026-10-29; review",
+  ]);
+  rmSync(dir, { recursive: true });
+});
+
+test("stale-declarations passes current records and skips without git or dates", () => {
+  const dir = repo({ "package.json": {} });
+  const m = { declarations: { ads: { source: "answered", answered_on: "2026-10-28" } } };
+  assert.equal(byId.get("stale-declarations").verify(m, dir, { today: TODAY }).status, "skip");
+  commit(dir, "2026-10-20");
+  assert.equal(byId.get("stale-declarations").verify(m, dir, { today: TODAY }).status, "pass");
+  assert.equal(byId.get("stale-declarations").verify({}, dir, { today: TODAY }).status, "skip");
   rmSync(dir, { recursive: true });
 });
 
