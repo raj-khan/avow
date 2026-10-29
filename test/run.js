@@ -220,6 +220,19 @@ test("listing-limits fails an over-long title", () => {
   assert.equal(r.status, "fail");
 });
 
+test("listing-limits warns on title policy breaches", () => {
+  const warn = (title) => byId.get("listing-limits").verify({ listing: { title } });
+  assert.deepEqual(warn("#1 Radio 📻 FREE").detail, [
+    "title: contains emoji",
+    "title: contains a performance or ranking claim",
+    "title: contains a price or promotion",
+  ]);
+  assert.deepEqual(warn("Radio www.radio.com").detail, ["title: contains a URL"]);
+  assert.deepEqual(warn("Call +1 555 123 4567").detail, ["title: contains a phone number"]);
+  assert.equal(warn("Quran Radio: Live Recitation").status, "pass");
+  assert.equal(warn("Topaz Freedom Notes").status, "pass");
+});
+
 test("claims fails when the listing claims more than the data file holds", () => {
   const dir = repo({ "dist/catalogue.json": { stations: [1, 2, 3] } });
   const r = byId.get("claims").verify({
