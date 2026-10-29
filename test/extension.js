@@ -105,5 +105,39 @@ test("every question maps to a form the CLI knows", () => {
   for (const q of avow.QUESTIONS) assert.ok(known.has(q.form), `${q.form} is not in FORMS`);
 });
 
+// A minimal tree: { text, parent } stands in for DOM nodes.
+const tree = (...texts) => texts.reduce((parent, text) => ({ text, parent }), null);
+const access = { parent: (n) => n.parent, text: (n) => n.text };
+
+test("locate finds the smallest block holding exactly one question", () => {
+  const avow = load("questions.js", "fill.js");
+  const page = tree(
+    "Does your app contain ads? Yes No Does your app use advertising ID? Yes No",
+    "Does your app contain ads? Learn more Yes No",
+    "Yes No",
+  );
+  const found = avow.locate(page, access);
+  assert.equal(found.question.form, "ads");
+  assert.equal(found.block.text, "Does your app contain ads? Learn more Yes No");
+});
+
+test("locate gives up when the nearest match holds two questions", () => {
+  const avow = load("questions.js", "fill.js");
+  const page = tree("Does your app contain ads? Yes No Is your app a news app? Yes No", "Yes No");
+  assert.equal(avow.locate(page, access), null);
+  assert.equal(avow.locate(tree("Pick a category", "Yes No"), access), null);
+});
+
+test("pickOption matches the answer word, not a word inside a description", () => {
+  const avow = load("questions.js", "fill.js");
+  const options = [
+    { label: "Yes  Your app shows ads, including Nothing but a yes" },
+    { label: "No  Your app does not show ads" },
+  ];
+  assert.equal(avow.pickOption(options, "No"), options[1]);
+  assert.equal(avow.pickOption(options, "Yes"), options[0]);
+  assert.equal(avow.pickOption([{ label: "Not sure" }], "No"), null);
+});
+
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
 process.exit(failed ? 1 : 0);

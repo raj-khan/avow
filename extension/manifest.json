@@ -6,7 +6,7 @@
   "content_scripts": [
     {
       "matches": ["https://play.google.com/console/*"],
-      "js": ["src/load.js", "src/questions.js", "src/panel.js"],
+      "js": ["src/load.js", "src/questions.js", "src/fill.js", "src/panel.js"],
       "run_at": "document_idle"
     }
   ]

@@ -26,12 +26,14 @@
       <header>
         <strong>avow</strong>
         <button id="pick">Pick manifest</button>
+        <button id="fill" disabled>Fill this page</button>
         <button id="toggle" aria-label="Collapse">–</button>
       </header>
       <div class="body">
         <input id="file" type="file" accept=".json,application/json" hidden>
         <div id="status">Pick your release-manifest.json. It is read locally and forgotten when you leave the page.</div>
         <ul id="warnings" class="warn"></ul>
+        <div id="result"></div>
       </div>
     </div>`;
 
@@ -57,12 +59,25 @@
         li.textContent = w;
         $("warnings").append(li);
       }
-      document.dispatchEvent(new CustomEvent("avow:manifest"));
+      $("fill").disabled = false;
     } catch (e) {
       avow.manifest = null;
+      $("fill").disabled = true;
       $("status").className = "error";
       $("status").textContent = e.message;
     }
+  });
+
+  // Filling waits for a click: the human decides when the page is the right
+  // one, and saving stays theirs too.
+  $("fill").addEventListener("click", () => {
+    if (!avow.manifest) return;
+    const report = avow.fillPage(avow.manifest);
+    const n = (s) => report.filter((r) => r.status === s).length;
+    $("result").textContent = report.length
+      ? `Filled ${n("filled")}, left ${n("unfilled")} for you (yellow). Review, then save in the Console.`
+      : "No yes/no questions found on this page.";
+    avow.lastReport = report;
   });
 
   document.body.append(host);
