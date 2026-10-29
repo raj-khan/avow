@@ -41,6 +41,8 @@ Bump `version` in `manifest.json` for every upload.
 - **Fill `inherited` or `unanswered` declarations.** Only `answered` and
   `planned` ones.
 
+Privacy policy: [`PRIVACY.md`](../PRIVACY.md).
+
 ## Coverage
 
 | Screen | Manifest field | Kind |

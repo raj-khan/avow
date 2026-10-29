@@ -122,6 +122,10 @@ manifest, outlines anything it
 left for you, and never saves. See
 `extension/README.md`.
 
+## Privacy
+
+avow collects nothing, sends nothing and stores nothing. See `PRIVACY.md`.
+
 ## Not in scope yet
 
 Uploading. The Play Developer API covers bundles, listings and rollouts for
