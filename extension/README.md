@@ -1,6 +1,6 @@
 # avow for Chrome
 
-Fills the yes/no declarations on Play Console pages from an avow manifest you
+Fills Play Console declarations from an avow manifest you
 pick. It does not decide anything: the answers come from the manifest, which
 `avow check` has already verified against your repo.
 
@@ -22,7 +22,8 @@ pick. It does not decide anything: the answers come from the manifest, which
 
 ## What it will never do
 
-- **Submit or save.** It clicks radio options and nothing else.
+- **Submit or save.** It clicks radio options and checkboxes that belong to
+  a question it knows, and nothing else.
 - **Touch the network or your session.** No permissions, no background
   worker, no storage. `test/extension.js` fails the build if any of that
   appears in the source.
@@ -32,11 +33,30 @@ pick. It does not decide anything: the answers come from the manifest, which
 
 ## Coverage
 
-Seven questions today: Advertising ID, Ads, three Data safety yes/no
-questions, News app and Government app. Their wording in
-`src/questions.js` comes from Play's help pages and has not yet been
-confirmed in a live Console; `QUESTIONS_OBSERVED` is `null` until it is. If a
-question is not recognised, fix its `text` there and set the date.
+| Screen | Manifest field | Kind |
+| --- | --- | --- |
+| App access | `app_access.restricted` | radio, by option text |
+| Ads | `ads.contains_ads` | yes/no |
+| Advertising ID | `advertising_id.uses_advertising_id` | yes/no |
+| Target audience | `target_audience.age_groups` | checkboxes |
+| Data safety, first step | `data_safety.collects_user_data` / `shares_user_data`, `encrypted_in_transit`, `deletion_request_mechanism` | yes/no |
+| Data safety, data types | `data_safety.data_types` (Play's labels, e.g. `"Crash logs"`) | checkboxes |
+| News app | `news_app.is_news_app` | yes/no |
+| Government app | `government_app.is_government_app` | yes/no |
+
+For checkbox screens the manifest lists what should be ticked; every other
+option on that screen is unticked. Checkboxes that belong to no known question
+(consent boxes, filters, category headings) are never touched. A value that is
+not one of Play's options is refused with the reason, not guessed at.
+
+Still manual: login instructions for restricted apps, the per-data-type
+collected/shared/purpose screens, Content ratings, Financial features, Health,
+Data deletion URL and anything with free text.
+
+The wording in `src/questions.js` comes from Play's help pages and has not yet
+been confirmed in a live Console; `QUESTIONS_OBSERVED` is `null` until it is.
+If a question is not recognised (dashed yellow outline), fix its `text` or
+`anchor` there and set the date.
 
 Manifests that use `extends` are not resolved here; answers that live only in
 the baseline are left unfilled, and the panel says so.

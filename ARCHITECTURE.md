@@ -82,7 +82,7 @@ src/lib/git.js        file history and old revisions, via the git binary
 src/lib/diff.js       declaration changes between two manifests
 schema/*.json         JSON Schema for the manifest, enforced by the `schema` rule
 test/run.js           fake repos in temp dirs, no real build required
-extension/            MV3 content script: pick a manifest, fill yes/no questions
+extension/            MV3 content script: pick a manifest, fill radio and checkbox questions
 test/extension.js     extension logic in a vm context, plus permission and network guards
 ```
 
@@ -147,13 +147,14 @@ because an invariant guarding a number nobody reads is decoration.
 
 ### Later
 
-- **The Chrome extension: widen coverage.** The first version is in
-  `extension/` (see its README): no permissions, picks a manifest, fills seven
-  yes/no questions by their text, never saves, outlines what it left. Next:
-  confirm the question wording during a real submission and set
-  `QUESTIONS_OBSERVED`, then add the multi-option screens (App access, Target
-  audience, Data safety data types). The three non-negotiables still hold:
-  match on question text, never auto-submit, no credentials or network.
+- **The Chrome extension: confirm and widen.** The first version is in
+  `extension/` (see its README): no permissions, picks a manifest, fills
+  yes/no, option-text and checkbox questions (App access, Ads, Advertising ID,
+  Target audience, Data safety first step and data types, News, Government),
+  never saves, outlines what it left. Next: confirm the wording during a real
+  submission and set `QUESTIONS_OBSERVED`, then the per-data-type Data safety
+  screens. The three non-negotiables still hold: match on question text, never
+  auto-submit, no credentials or network.
 - **App Store Connect.** The same problem exists on iOS: privacy nutrition
   labels, encryption export compliance, content rights, age rating. Larger
   surface, same shape. The manifest grows a `ios` section rather than forking.
