@@ -8,12 +8,12 @@ import { print } from "./lib/report.js";
 const DEFAULT_MANIFEST = "store/release-manifest.json";
 
 function usage() {
-  console.log(`store-decl - Google Play declarations as code
+  console.log(`avow - Google Play declarations as code
 
-  store-decl check [repo]            verify the manifest against the repo
-  store-decl explain [question]      why an answer is what it is
-  store-decl forms                   every Console screen, in submission order
-  store-decl init [repo]             write a starter manifest
+  avow check [repo]          verify the manifest against the repo
+  avow explain [question]    why an answer is what it is
+  avow forms                 every Console screen, in submission order
+  avow init [repo]           write a starter manifest
 
 Options
   --manifest <path>   default ${DEFAULT_MANIFEST}, relative to the repo
@@ -38,7 +38,7 @@ function parse(argv) {
 function load(root, rel) {
   const path = join(root, rel);
   if (!existsSync(path)) {
-    console.error(`No manifest at ${path}\nRun \`store-decl init\` to write a starter one.`);
+    console.error(`No manifest at ${path}\nRun \`avow init\` to write a starter one.`);
     process.exit(2);
   }
   try {
@@ -59,7 +59,7 @@ if (opts.help || !cmd) {
 if (cmd === "check") {
   const root = resolve(opts.positional[0] ?? ".");
   const manifest = load(root, opts.manifest);
-  // A rule that throws is a bug in store-decl, not a failed declaration, so it
+  // A rule that throws is a bug in avow, not a failed declaration, so it
   // must not read as a policy problem.
   const results = rules.map((r) => {
     try {
@@ -84,7 +84,7 @@ if (cmd === "explain") {
       )
     : rules;
   if (!matches.length) {
-    console.error(`Nothing matches "${q}". Try \`store-decl explain\` for all of them.`);
+    console.error(`Nothing matches "${q}". Try \`avow explain\` for all of them.`);
     process.exit(2);
   }
   for (const r of matches) {

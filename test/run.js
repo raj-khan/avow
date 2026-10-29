@@ -20,7 +20,7 @@ function test(name, fn) {
 
 // A fake repo per test, so nothing depends on a real build having been run.
 function repo(files) {
-  const dir = mkdtempSync(join(tmpdir(), "store-decl-"));
+  const dir = mkdtempSync(join(tmpdir(), "avow-"));
   for (const [rel, body] of Object.entries(files)) {
     const path = join(dir, rel);
     mkdirSync(join(path, ".."), { recursive: true });

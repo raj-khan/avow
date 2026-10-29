@@ -1,6 +1,6 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://github.com/salim/store-decl/schema/manifest.schema.json",
+  "$id": "https://github.com/raj-khan/avow/schema/manifest.schema.json",
   "title": "Play release manifest",
   "type": "object",
   "required": ["schema", "app", "declarations"],

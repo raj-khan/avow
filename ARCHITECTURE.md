@@ -1,4 +1,4 @@
-# store-decl: what this is and where it goes
+# avow: what this is and where it goes
 
 Written 2026-10-29, immediately after a first Google Play submission, while the
 details were still fresh. Status markers are honest: **done**, **next**,
@@ -40,11 +40,11 @@ manifest (JSON, in the app's repo)
     |-- holds every answer, each with a `why` and a `source`
     |
     +-- consumed by:
-          store-decl check      verify against the repo        DONE
-          store-decl explain    the reasoning, on demand       DONE
-          store-decl forms      the Console's screen order     DONE
+          avow check      verify against the repo        DONE
+          avow explain    the reasoning, on demand       DONE
+          avow forms      the Console's screen order     DONE
           extension             fill the forms in the browser  LATER
-          store-decl api        push what the API can take     MAYBE
+          avow api        push what the API can take     MAYBE
 ```
 
 The manifest is the durable artifact. Everything else is a consumer of it and
@@ -127,7 +127,7 @@ because an invariant guarding a number nobody reads is decoration.
 - **Schema validation in `check`.** The schema exists but nothing enforces it.
   Needs a small hand-rolled validator, since a dependency is not worth it for
   one document shape.
-- **`store-decl diff`.** Compare the manifest against the previous git revision
+- **`avow diff`.** Compare the manifest against the previous git revision
   and list which declarations changed. A changed Data safety answer should be
   loud in review; today it is one line in a diff nobody reads closely.
 - **Permission inventory rule.** Report every permission in the merged manifest
@@ -158,7 +158,7 @@ because an invariant guarding a number nobody reads is decoration.
 
 - **Push the machine-fillable parts.** The Play Developer API covers listing
   text, graphics and release notes. The manifest already holds all of it, so
-  `store-decl push` is mostly plumbing. Deliberately deprioritised: `eas
+  `avow push` is mostly plumbing. Deliberately deprioritised: `eas
   submit` already does this for anyone on Expo, and competing with it is not
   the point.
 - **Hosted.** A dashboard that watches repos and warns when a dependency

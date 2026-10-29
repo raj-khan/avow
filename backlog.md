@@ -10,7 +10,7 @@ Status: `todo`, `done`.
 
 | # | Task | v2 section | Status |
 |---|------|-----------|--------|
-| 1 | Rename `store-decl` to `avow` (package, bin, CLI text, docs, schema `$id`) | n/a | todo |
+| 1 | Rename `store-decl` to `avow` (package, bin, CLI text, docs, schema `$id`) | n/a | done |
 | 2 | CI: GitHub Actions runs `npm test` on PRs and main | n/a | todo |
 | 3 | `source` enum gains `inherited` and `unanswered`; `completeness` fails on `unanswered`, warns on `planned` and `inherited` | 4 | todo |
 | 4 | `--release` flag: `planned` and `inherited` fail instead of warn | 4 | todo |
