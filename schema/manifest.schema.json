@@ -56,8 +56,8 @@
         "required": ["source"],
         "properties": {
           "source": {
-            "enum": ["answered", "planned", "n/a"],
-            "description": "answered means entered in the Console, not merely decided."
+            "enum": ["answered", "planned", "inherited", "unanswered", "n/a"],
+            "description": "answered means entered in the Console, not merely decided. planned is decided but not entered. inherited was copied from another app's manifest and not re-answered. unanswered is not yet decided."
           },
           "question": { "type": "string" },
           "console_path": { "type": "string" },

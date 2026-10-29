@@ -30,19 +30,33 @@ export default {
   verify(m) {
     const d = m.declarations ?? {};
     const missing = FORMS.filter(([k]) => !d[k]).map(([k, label]) => `${k}: ${label}`);
+    const sourced = (s) => Object.entries(d).filter(([, v]) => v.source === s).map(([k]) => k);
+    // An unanswered declaration cannot be entered in the Console, so the
+    // submission is blocked exactly as if it were missing.
+    const unanswered = sourced("unanswered");
+    // Planned is decided but not entered; inherited was answered for a
+    // different app. Both are true of the manifest and not yet of the Console.
+    const pending = [
+      ...sourced("planned").map((k) => `${k}: planned, not yet entered in the Console`),
+      ...sourced("inherited").map((k) => `${k}: inherited from another app, not re-answered`),
+    ];
     const unexplained = Object.entries(d)
-      .filter(([, v]) => !v.why && v.source !== "n/a")
+      .filter(([, v]) => !v.why && v.source !== "n/a" && v.source !== "unanswered")
       .map(([k]) => k);
 
-    if (missing.length) {
-      return result(FAIL, this.id, `${missing.length} declaration(s) missing`, missing);
+    if (missing.length || unanswered.length) {
+      const detail = [...missing, ...unanswered.map((k) => `${k}: unanswered`)];
+      return result(FAIL, this.id, `${detail.length} declaration(s) missing or unanswered`, detail);
     }
-    if (unexplained.length) {
+    if (pending.length || unexplained.length) {
+      const parts = [];
+      if (pending.length) parts.push(`${pending.length} not yet answered in the Console`);
+      if (unexplained.length) parts.push(`${unexplained.length} without a reason`);
       return result(
         WARN,
         this.id,
-        `all ${FORMS.length} declarations present, ${unexplained.length} without a reason`,
-        unexplained
+        `all ${FORMS.length} declarations present, ${parts.join(", ")}`,
+        [...pending, ...unexplained]
       );
     }
     return result(PASS, this.id, `all ${FORMS.length} declarations present and explained`);

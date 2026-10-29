@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import assert from "node:assert/strict";
 import { rules, byId } from "../src/rules/index.js";
+import { FORMS } from "../src/rules/completeness.js";
 import { imageSize } from "../src/lib/imagesize.js";
 import { permissions } from "../src/lib/android.js";
 
@@ -116,6 +117,29 @@ test("claims fails when a pinned number is absent from the copy", () => {
 test("completeness fails on a missing declaration", () => {
   const r = byId.get("completeness").verify({ declarations: { app_access: { why: "x" } } });
   assert.equal(r.status, "fail");
+});
+
+const allForms = (over = {}) => ({
+  declarations: Object.fromEntries(
+    FORMS.map(([k]) => [k, { source: "answered", why: "x", ...over[k] }])
+  ),
+});
+
+test("completeness passes when every declaration is answered and explained", () => {
+  assert.equal(byId.get("completeness").verify(allForms()).status, "pass");
+});
+
+test("completeness fails on an unanswered declaration", () => {
+  const r = byId.get("completeness").verify(allForms({ ads: { source: "unanswered" } }));
+  assert.equal(r.status, "fail");
+  assert.deepEqual(r.detail, ["ads: unanswered"]);
+});
+
+test("completeness warns on planned and inherited declarations", () => {
+  const r = byId.get("completeness").verify(
+    allForms({ ads: { source: "planned" }, health: { source: "inherited" } }));
+  assert.equal(r.status, "warn");
+  assert.equal(r.detail.length, 2);
 });
 
 test("every rule carries a question, a path and a reason", () => {
