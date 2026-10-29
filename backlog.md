@@ -45,6 +45,11 @@ tests. Plain MV3, no build step, no dependencies.
 | E7 | Checkbox questions: Target audience age groups, ticking and unticking | done |
 | E8 | Data safety data types as a checkbox question | done |
 | E9 | Docs: coverage in extension README and ARCHITECTURE.md | done |
+| E10 | Manifest `data_type_details` per data type, and a `data-type-details` CLI rule | todo |
+| E11 | Extension: work out which data type a per-type screen is for | todo |
+| E12 | Extension: collected/shared, processed ephemerally, required or optional | todo |
+| E13 | Extension: collection and sharing purposes, list kept in step with the CLI | todo |
+| E14 | Docs: per-type screens in extension README, README and ARCHITECTURE.md | todo |
 
 ## Deliberately not taken from v2
 
