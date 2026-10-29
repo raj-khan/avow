@@ -84,7 +84,7 @@ the report.
 | X22 | P2 | Code | Swap green and yellow for a colorblind-safe pair, and add a small visible text tag to each marked block | done |
 | X23 | P2 | Code | Move colors to CSS custom properties with a `prefers-color-scheme: dark` block; in `forced-colors`, replace `box-shadow` with a `CanvasText` border; give the panel its own accent | done |
 | X24 | P2 | Code | Use `scrollIntoView` with `behavior: "auto"` under `prefers-reduced-motion` | done |
-| X25 | P2 | Code | Empty state as three numbered steps, plus a one-line legend after a fill | todo |
+| X25 | P2 | Code | Empty state as three numbered steps, plus a one-line legend after a fill | done |
 | X26 | P2 | Code | On Navigation API `currententrychange` (when present), clear marks and results and show "Page changed, fill again"; no persistent observer | todo |
 | X27 | P2 | Code | Undo: snapshot each touched control's prior state before a fill and offer "Undo fill" through the same click path | todo |
 | X28 | P2 | Code | Show the panel host with `popover="manual"` and `showPopover()`, and drop the `z-index` hack | todo |
