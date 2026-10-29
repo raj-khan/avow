@@ -3,6 +3,7 @@ import { join } from "node:path";
 import vm from "node:vm";
 import assert from "node:assert/strict";
 import { FORMS } from "../src/rules/completeness.js";
+import { DATA_TYPES } from "../src/lib/play.js";
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -212,6 +213,12 @@ test("data types refuse a manifest value Play does not list", () => {
   const q = avow.QUESTIONS.find((x) => x.kind === "checkboxes" && x.form === "data_safety");
   const r = avow.answerFor({ declarations: { data_safety: { source: "answered", data_types: ["crash logs", "telemetry"] } } }, q);
   assert.match(r.reason, /"telemetry", not an option/);
+});
+
+test("extension data types match the CLI's list exactly", () => {
+  const avow = load("questions.js");
+  const q = avow.QUESTIONS.find((x) => x.kind === "checkboxes" && x.form === "data_safety");
+  assert.deepEqual([...q.options], DATA_TYPES);
 });
 
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
