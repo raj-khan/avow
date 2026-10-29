@@ -24,8 +24,8 @@ Bump `version` in `manifest.json` for every upload.
 
 1. In the avow panel (bottom right), **Pick manifest** and choose your
    `store/release-manifest.json`.
-2. **Fill this page**. Recognised questions are ticked and outlined green.
-3. Anything outlined yellow is yours: either the manifest has no usable answer
+2. **Fill this page**. Recognised questions are ticked and outlined blue.
+3. Anything outlined orange is yours: either the manifest has no usable answer
    (the reason is in the tooltip and the panel), or avow does not know the
    question (dashed outline).
 4. Read the page and save it yourself.
@@ -40,7 +40,7 @@ every screen the extension fills.
    are not saved unless you click Save, so this is safe on a real account.
 3. In the avow panel, **Pick manifest** and choose `test-manifest.json`.
 4. **Fill this page**. For the Ads screen, "No" is selected and outlined
-   green, and the panel reports "Filled 1".
+   blue, and the panel reports "Filled 1".
 5. Leave the page without saving, or save if the answers are right for you.
 
 What each screen gets from the sample:
@@ -93,14 +93,14 @@ not one of Play's options is refused with the reason, not guessed at.
 
 Per-type screens are matched to a data type by their heading: the nearest
 heading that names exactly one of Play's data types, by its whole text. If
-none does, or two do, the screen is left yellow rather than guessed.
+none does, or two do, the screen is left orange rather than guessed.
 
 Still manual: login instructions for restricted apps, Content ratings, Financial features, Health,
 Data deletion URL and anything with free text.
 
 The wording in `src/questions.js` comes from Play's help pages and has not yet
 been confirmed in a live Console; `QUESTIONS_OBSERVED` is `null` until it is.
-If a question is not recognised (dashed yellow outline), fix its `text` or
+If a question is not recognised (dashed orange outline), fix its `text` or
 `anchor` there and set the date.
 
 Manifests that use `extends` are not resolved here; answers that live only in
