@@ -8,6 +8,7 @@ import { FORMS, FORMS_OBSERVED, formsAge } from "../src/rules/completeness.js";
 import { imageSize } from "../src/lib/imagesize.js";
 import { permissions, gradleDependencies, permissionSources } from "../src/lib/android.js";
 import { github } from "../src/lib/report.js";
+import { diffManifests } from "../src/lib/diff.js";
 
 let passed = 0, failed = 0;
 function test(name, fn) {
@@ -390,6 +391,33 @@ test("github format annotates fails and warns, not passes or skips", () => {
     "::error file=store/release-manifest.json,title=avow schema::1 schema error(s)%0A$.app: missing, really",
     "::warning file=store/release-manifest.json,title=avow assets::100%25 sure",
   ]);
+});
+
+test("diffManifests reports added, removed and changed declarations by field", () => {
+  const before = {
+    declarations: {
+      data_safety: { source: "answered", collects_user_data: false, data_types: ["none"] },
+      news_app: { source: "answered" },
+    },
+  };
+  const after = {
+    declarations: {
+      data_safety: { source: "answered", collects_user_data: true, data_types: ["crash logs"] },
+      ads: { source: "planned" },
+    },
+    permissions: { "android.permission.INTERNET": "streams" },
+    listing: { title: "ignored" },
+  };
+  assert.deepEqual(diffManifests(before, after), [
+    { kind: "added", name: "declarations.ads", fields: [] },
+    { kind: "changed", name: "declarations.data_safety", fields: [
+      { field: "collects_user_data", before: "false", after: "true" },
+      { field: "data_types", before: '["none"]', after: '["crash logs"]' },
+    ] },
+    { kind: "removed", name: "declarations.news_app", fields: [] },
+    { kind: "added", name: "permissions.android.permission.INTERNET", fields: [] },
+  ]);
+  assert.deepEqual(diffManifests(after, after), []);
 });
 
 test("every rule carries a question, a path and a reason", () => {

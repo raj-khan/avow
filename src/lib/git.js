@@ -23,6 +23,10 @@ export function lastChanged(root, rel, today = new Date()) {
   return git(root, ["log", "-1", "--format=%cs", "--", rel]) || null;
 }
 
+export function revExists(root, rev) {
+  return git(root, ["rev-parse", "--verify", "--quiet", `${rev}^{commit}`]) !== null;
+}
+
 export function show(root, rev, rel) {
   return git(root, ["show", `${rev}:${rel}`]);
 }

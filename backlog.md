@@ -24,7 +24,7 @@ Status: `todo`, `done`.
 | 12 | `stale-declarations` rule: dependency or claim files changed after `answered_on`, or answer older than 6 months | 6 | done |
 | 13 | `listing-limits` warns on URLs, phone numbers, emoji and unqualified superlatives in the title | 5 | done |
 | 14 | `--format github` emits Actions annotations | 11 Phase 1 | done |
-| 15 | `avow diff`: declarations changed since a git revision | 11 Phase 2 | todo |
+| 15 | `avow diff`: declarations changed since a git revision | 11 Phase 2 | done |
 | 16 | `extends`: a manifest inherits a shared baseline, per-app overrides win | 11 Phase 4 | todo |
 | 17 | Docs: ARCHITECTURE.md roadmap and rules table, README, drop "push" from the roadmap | 12 | todo |
 
