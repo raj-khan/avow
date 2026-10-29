@@ -76,7 +76,7 @@ the report.
 | X14 | P1 | Code | Replace `li.jump` with `<button>`s that scroll to the question and focus its first control | done |
 | X15 | P1 | Code | Toggle gets `aria-expanded`, `aria-controls` and a label that switches between Collapse and Expand; Esc collapses the panel | done |
 | X16 | P1 | Code | Collapse to a pill after a fill, and add a top-right dock toggle held in memory | done |
-| X17 | P1 | Code | Language guard: if `document.documentElement.lang` is not `en*`, show "English Console only" instead of "no questions found" | todo |
+| X17 | P1 | Code | Language guard: if `document.documentElement.lang` is not `en*`, show "English Console only" instead of "no questions found" | done |
 | X18 | P1 | Code | Add `extension/test-manifest.json` (sample) and reviewer test instructions in `extension/README.md` | todo |
 | X19 | P1 | Manual | Capture 3 screenshots at 1280x800 from a demo app with account details hidden, and make a 440x280 promo tile with no text | todo |
 | X20 | P1 | Manual | Write the listing: name "avow", summary with "for Google Play Console™", trust lines (no permissions, no network, nothing stored, never submits), "Not affiliated with Google", attribution line, category Developer Tools, support URL to GitHub issues | todo |
