@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 import { readFileSync, existsSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { join, resolve, relative } from "node:path";
 import { rules, byId } from "./rules/index.js";
 import { FORMS, FORMS_OBSERVED, FORMS_STALE_DAYS, formsAge } from "./rules/completeness.js";
-import { print } from "./lib/report.js";
+import { print, github } from "./lib/report.js";
 
 const DEFAULT_MANIFEST = "store/release-manifest.json";
 
@@ -19,6 +19,7 @@ Options
   --manifest <path>   default ${DEFAULT_MANIFEST}, relative to the repo
   --release           planned and inherited declarations fail instead of warn
   --json              machine-readable output
+  --format github     GitHub Actions annotations on the manifest (or json)
   --no-color
 `);
 }
@@ -29,6 +30,7 @@ function parse(argv) {
     const a = argv[i];
     if (a === "--manifest") opts.manifest = argv[++i];
     else if (a === "--json") opts.json = true;
+    else if (a === "--format") opts.format = argv[++i];
     else if (a === "--release") opts.release = true;
     else if (a === "--no-color") opts.color = false;
     else if (a === "-h" || a === "--help") opts.help = true;
@@ -61,6 +63,11 @@ function load(root, rel) {
 
 const [cmd, ...rest] = process.argv.slice(2);
 const opts = parse(rest);
+if (opts.format === "json") opts.json = true;
+else if (opts.format && opts.format !== "github") {
+  console.error(`Unknown format "${opts.format}"; expected github or json.`);
+  process.exit(2);
+}
 if (opts.help || !cmd) {
   usage();
   process.exit(cmd ? 0 : 1);
@@ -78,10 +85,16 @@ if (cmd === "check") {
       return { status: "warn", rule: r.id, message: `rule errored: ${e.message}` };
     }
   });
+  const failed = results.some((r) => r.status === "fail");
+  if (opts.format === "github") {
+    const file = relative(process.cwd(), join(root, opts.manifest)) || opts.manifest;
+    for (const line of github(results, file)) console.log(line);
+    process.exit(failed ? 1 : 0);
+  }
   if (opts.json) {
     const forms_observed = { ...FORMS_OBSERVED, age_days: formsAge() };
     console.log(JSON.stringify({ root, manifest: opts.manifest, forms_observed, results }, null, 2));
-    process.exit(results.some((r) => r.status === "fail") ? 1 : 0);
+    process.exit(failed ? 1 : 0);
   }
   console.log(`${root}  (${opts.manifest})`);
   console.log(`${formsFreshness()}\n`);

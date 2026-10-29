@@ -21,3 +21,18 @@ export function print(results, { color = true } = {}) {
   console.log(`\n${parts.join(", ")}`);
   return n(FAIL) === 0;
 }
+
+// GitHub Actions workflow commands, so failures annotate the manifest in the
+// PR diff instead of hiding in the log. Skips stay out: they are not findings.
+const LEVEL = { fail: "error", warn: "warning" };
+const escData = (t) => t.replace(/%/g, "%25").replace(/\r/g, "%0D").replace(/\n/g, "%0A");
+const escProp = (t) => escData(t).replace(/:/g, "%3A").replace(/,/g, "%2C");
+
+export function github(results, file) {
+  return results
+    .filter((r) => LEVEL[r.status])
+    .map((r) => {
+      const body = [r.message, ...[].concat(r.detail ?? [])].join("\n");
+      return `::${LEVEL[r.status]} file=${escProp(file)},title=${escProp(`avow ${r.rule}`)}::${escData(body)}`;
+    });
+}
