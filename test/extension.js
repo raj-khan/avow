@@ -292,5 +292,14 @@ test("purposes tick from the matching list, refusing off-list values", () => {
   assert.match(avow.answerFor(bad, collectedQ, { dataType: "Crash logs" }).reason, /"Telemetry", not an option/);
 });
 
+test("applyChoice reads the control back and never trusts a click", () => {
+  const avow = load("questions.js", "fill.js");
+  const control = { isChecked: (n) => n.on, click: (n) => { if (!n.deaf) n.on = !n.on; } };
+  assert.equal(avow.applyChoice({ on: true }, true, control), "already");
+  assert.equal(avow.applyChoice({ on: false }, true, control), "applied");
+  assert.equal(avow.applyChoice({ on: true }, false, control), "applied");
+  assert.equal(avow.applyChoice({ on: false, deaf: true }, true, control), "not applied");
+});
+
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);
 process.exit(failed ? 1 : 0);

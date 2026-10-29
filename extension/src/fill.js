@@ -63,6 +63,16 @@
       .map((p) => ({ option: p.option, key: p.key, want: want.has(p.key) }));
   };
 
+  // Click a control only if it is not already in the wanted state, then read
+  // it back. element.click() sends an untrusted event that some Google
+  // surfaces ignore, so a click is a request, not a result: anything still in
+  // the wrong state is "not applied" and never reported as filled.
+  avow.applyChoice = (node, want, { isChecked, click }) => {
+    if (isChecked(node) === want) return "already";
+    click(node);
+    return isChecked(node) === want ? "applied" : "not applied";
+  };
+
   // What the panel lists after a fill. notSeen covers questions from a form
   // that is on screen but whose question is not: the Console splits Data
   // safety across steps, so these are for the next screen, not errors.
@@ -131,6 +141,7 @@
   }
 
   const isChecked = (el) => el.checked === true || el.getAttribute("aria-checked") === "true";
+  const control = { isChecked, click: (el) => el.click() };
 
   const marked = new Set();
   function mark(block, color, title, style = "solid") {
@@ -171,7 +182,15 @@
       const plan = avow.planChecks(options, question, answer.labels);
       const seen = new Set(plan.map((p) => p.key));
       const missing = answer.labels.filter((l) => !seen.has(avow.normalize(l)));
-      for (const { option, want } of plan) if (isChecked(option.node) !== want) option.node.click();
+      const ignored = plan
+        .filter(({ option, want }) => avow.applyChoice(option.node, want, control) === "not applied")
+        .map(({ option, want }) => `"${option.label.trim()}" (${want ? "tick" : "untick"})`);
+      if (ignored.length) {
+        const reason = `the Console ignored avow's click on ${ignored.join(", ")}; set ${ignored.length === 1 ? "it" : "them"} yourself`;
+        mark(block, "#f9ab00", reason);
+        report.push({ status: "unfilled", question, block, reason });
+        continue;
+      }
       if (missing.length) {
         const reason = `ticked what was found; no checkbox for ${missing.map((l) => `"${l}"`).join(", ")}`;
         mark(block, "#f9ab00", reason);
@@ -211,7 +230,12 @@
         report.push({ status: "unfilled", question, block, reason });
         continue;
       }
-      if (!isChecked(option.node)) option.node.click();
+      if (avow.applyChoice(option.node, true, control) === "not applied") {
+        const reason = `the Console ignored avow's click on "${answer.label}"; select it yourself`;
+        mark(block, "#f9ab00", reason);
+        report.push({ status: "unfilled", question, block, reason });
+        continue;
+      }
       mark(block, "#1e8e3e", `filled "${answer.label}" from declarations.${question.form}`);
       report.push({ status: "filled", question, block, label: answer.label });
     }
