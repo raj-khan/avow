@@ -4,6 +4,14 @@ One heading per `version` in `manifest.json`. `npm run pack:extension`
 refuses to build a version that has no heading here. Tag each store upload
 `ext-v<version>` so the CLI and the extension release independently.
 
+## 0.2.0
+
+- Side panel: the toolbar button opens avow beside the Console with the same
+  controls. It keeps the manifest across tab switches and reloads, until you
+  close it, and the in-page panel steps aside while it is open.
+- Adds the `sidePanel` permission (no install warning) and a service worker
+  whose only job is opening the side panel.
+
 ## 0.1.0
 
 First version, not yet on the Chrome Web Store.

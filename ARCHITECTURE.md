@@ -151,7 +151,8 @@ because an invariant guarding a number nobody reads is decoration.
 ### Later
 
 - **The Chrome extension: confirm and widen.** The first version is in
-  `extension/` (see its README): no permissions, picks a manifest, fills
+  `extension/` (see its README): one no-warning permission (`sidePanel`),
+  an in-page panel and a side panel over the same actions, picks a manifest, fills
   yes/no, option-text and checkbox questions (App access, Ads, Advertising ID,
   Target audience, all of Data safety including the per-type screens, News,
   Government), never saves, outlines what it left. Next: confirm the wording
