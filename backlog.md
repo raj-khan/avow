@@ -64,8 +64,8 @@ the report.
 | X2 | P0 | Manual | Register on the Chrome Web Store (US$5) and declare non-trader | todo |
 | X3 | P0 | Manual | Generate an RSA signing key offline and opt in to Verified CRX Uploads on the item's Package tab | todo |
 | X4 | P0 | Code | Read back each control after `click()` in `fill.js`; report applied, already set or not applied, and mark "not applied" yellow | done |
-| X5 | P0 | Manual | Author `extension/icons/icon.svg`, export PNGs at 16, 24, 32, 48 and 128, hand-tune 16px; no Google marks or colors | todo |
-| X6 | P0 | Code | Add `icons` and `action` (`default_title`, `default_icon` 16/24/32) to `manifest.json` | todo |
+| X5 | P0 | Manual | Author `extension/icons/icon.svg`, export PNGs at 16, 24, 32, 48 and 128, hand-tune 16px; no Google marks or colors | done |
+| X6 | P0 | Code | Add `icons` and `action` (`default_title`, `default_icon` 16/24/32) to `manifest.json` | done |
 | X7 | P0 | Code | Manifest checks in `test/extension.js`: icon files exist and their dimensions match their keys (via `src/lib/imagesize.js`), `version` format valid, `description` 132 characters or fewer | todo |
 | X8 | P0 | Code | `scripts/pack-extension.sh`: allowlist zip (`manifest.json`, `src/`, `icons/`) from inside `extension/` into `dist/`, from a clean git tree | todo |
 | X9 | P0 | Code | Add `PRIVACY.md` (no collection, in-memory processing only, Limited Use statement) and link it from the README | todo |
