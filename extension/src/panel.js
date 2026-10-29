@@ -32,6 +32,13 @@
     header strong { flex: 1; }
     .body { padding: 8px 12px; }
     .collapsed .body { display: none; }
+    /* Collapsed is a pill: just the name, the tally and the toggle, small
+       enough to leave the Console's Save bar clear. */
+    .collapsed { width: auto; }
+    .collapsed header { border-bottom: 0; padding: 4px 8px; }
+    .collapsed #pick, .collapsed #fill, .collapsed #dock { display: none; }
+    .top { top: 16px; bottom: auto; }
+    #tally { color: #5f6368; font-size: 12px; }
     button { font: inherit; cursor: pointer; }
     .warn { color: #b06000; }
     .error { color: #c5221f; }
@@ -47,8 +54,12 @@
     el("div", { class: "panel" },
       el("header", {},
         el("strong", { text: "avow" }),
+        el("span", { id: "tally" }),
         el("button", { id: "pick", text: "Pick manifest" }),
         el("button", { id: "fill", text: "Fill this page", disabled: true }),
+        el("button", {
+          id: "dock", type: "button", "aria-label": "Move avow panel to the top", text: "\u2191",
+        }),
         el("button", {
           id: "toggle", type: "button", "aria-label": "Collapse avow panel",
           "aria-expanded": "true", "aria-controls": "body", text: "\u2013",
@@ -84,6 +95,13 @@
     $("toggle").textContent = collapsed ? "+" : "\u2013";
   };
   $("toggle").addEventListener("click", () => avow.setCollapsed(!panel.classList.contains("collapsed")));
+  // Docking is held in memory only, like everything else here; the panel
+  // starts at the bottom on every page load.
+  $("dock").addEventListener("click", () => {
+    const top = panel.classList.toggle("top");
+    $("dock").textContent = top ? "\u2193" : "\u2191";
+    $("dock").setAttribute("aria-label", `Move avow panel to the ${top ? "bottom" : "top"}`);
+  });
   panel.addEventListener("keydown", (e) => {
     if (e.key !== "Escape" || panel.classList.contains("collapsed")) return;
     e.stopPropagation();
@@ -98,6 +116,7 @@
     $("warnings").replaceChildren();
     $("error").textContent = "";
     $("summary").textContent = "";
+    $("tally").textContent = "";
     $("result").replaceChildren();
     try {
       avow.checkSize(file.size);
@@ -130,7 +149,11 @@
       $("summary").textContent = "No questions avow knows were found on this page.";
       return;
     }
-    $("summary").textContent = `Filled ${filled.length}, left ${unfilled.length + unknown.length} for you. ` +
+    const left = unfilled.length + unknown.length;
+    $("tally").textContent = `${filled.length} filled, ${left} left`;
+    // Nothing left to do: get out of the way so the Save bar is free.
+    if (!left) avow.setCollapsed(true);
+    $("summary").textContent = `Filled ${filled.length}, left ${left} for you. ` +
       "Everything outlined yellow is yours to answer. Review the page, then save in the Console.";
     section("Left for you", unfilled.map((r) => [r.question.text || r.question.form, r.reason, r.block]));
     section("Not in avow's question list", unknown.map((r) => [r.text, "", r.block]));
