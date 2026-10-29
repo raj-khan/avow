@@ -49,9 +49,12 @@
         el("strong", { text: "avow" }),
         el("button", { id: "pick", text: "Pick manifest" }),
         el("button", { id: "fill", text: "Fill this page", disabled: true }),
-        el("button", { id: "toggle", "aria-label": "Collapse", text: "\u2013" }),
+        el("button", {
+          id: "toggle", type: "button", "aria-label": "Collapse avow panel",
+          "aria-expanded": "true", "aria-controls": "body", text: "\u2013",
+        }),
       ),
-      el("div", { class: "body" },
+      el("div", { class: "body", id: "body" },
         el("input", { id: "file", type: "file", accept: ".json,application/json", hidden: true }),
         // Live regions exist from the start and only their text changes, which
         // is what screen readers need to announce an update.
@@ -72,7 +75,21 @@
   const panel = root.querySelector(".panel");
   avow.ui = { root, $ };
 
-  $("toggle").addEventListener("click", () => panel.classList.toggle("collapsed"));
+  // Collapsed is the panel's way out of the Console's road: Esc from anywhere
+  // inside it gets the Save bar and the form back (WCAG 2.4.11).
+  avow.setCollapsed = (collapsed) => {
+    panel.classList.toggle("collapsed", collapsed);
+    $("toggle").setAttribute("aria-expanded", String(!collapsed));
+    $("toggle").setAttribute("aria-label", `${collapsed ? "Expand" : "Collapse"} avow panel`);
+    $("toggle").textContent = collapsed ? "+" : "\u2013";
+  };
+  $("toggle").addEventListener("click", () => avow.setCollapsed(!panel.classList.contains("collapsed")));
+  panel.addEventListener("keydown", (e) => {
+    if (e.key !== "Escape" || panel.classList.contains("collapsed")) return;
+    e.stopPropagation();
+    avow.setCollapsed(true);
+    $("toggle").focus();
+  });
   $("pick").addEventListener("click", () => $("file").click());
   $("file").addEventListener("change", async () => {
     const file = $("file").files[0];
