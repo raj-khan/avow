@@ -2,7 +2,7 @@
 import { readFileSync, existsSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { rules, byId } from "./rules/index.js";
-import { FORMS } from "./rules/completeness.js";
+import { FORMS, FORMS_OBSERVED, FORMS_STALE_DAYS, formsAge } from "./rules/completeness.js";
 import { print } from "./lib/report.js";
 
 const DEFAULT_MANIFEST = "store/release-manifest.json";
@@ -35,6 +35,14 @@ function parse(argv) {
     else opts.positional.push(a);
   }
   return opts;
+}
+
+function formsFreshness() {
+  const age = formsAge();
+  const line = `form knowledge last observed ${FORMS_OBSERVED.on} (${age} day${age === 1 ? "" : "s"} ago)`;
+  if (age <= FORMS_STALE_DAYS) return line;
+  return `WARNING: ${line}. Play may have changed its forms.\n` +
+    "Re-check them during your next submission and update FORMS in src/rules/completeness.js.";
 }
 
 function load(root, rel) {
@@ -71,10 +79,12 @@ if (cmd === "check") {
     }
   });
   if (opts.json) {
-    console.log(JSON.stringify({ root, manifest: opts.manifest, results }, null, 2));
+    const forms_observed = { ...FORMS_OBSERVED, age_days: formsAge() };
+    console.log(JSON.stringify({ root, manifest: opts.manifest, forms_observed, results }, null, 2));
     process.exit(results.some((r) => r.status === "fail") ? 1 : 0);
   }
-  console.log(`${root}  (${opts.manifest})\n`);
+  console.log(`${root}  (${opts.manifest})`);
+  console.log(`${formsFreshness()}\n`);
   process.exit(print(results, { color: opts.color }) ? 0 : 1);
 }
 
@@ -102,7 +112,8 @@ if (cmd === "forms") {
   FORMS.forEach(([key, label], i) => {
     console.log(`  ${String(i + 1).padStart(2)}. ${label.padEnd(32)} declarations.${key}`);
   });
-  console.log("\nObserved during a real 1.0 submission. Play does not publish this order.");
+  console.log(`\nObserved during ${FORMS_OBSERVED.during}. Play does not publish this order.`);
+  console.log(formsFreshness());
   process.exit(0);
 }
 
