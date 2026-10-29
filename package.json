@@ -5,7 +5,7 @@
   "type": "module",
   "bin": { "avow": "src/cli.js" },
   "engines": { "node": ">=20" },
-  "scripts": { "test": "node test/run.js" },
+  "scripts": { "test": "node test/run.js && node test/extension.js" },
   "license": "MIT",
   "private": true
 }

@@ -35,7 +35,7 @@ tests. Plain MV3, no build step, no dependencies.
 
 | # | Task | Status |
 |---|------|--------|
-| E1 | Scaffold: MV3 manifest with no permissions, in-page panel, manifest file picker, schema version check | todo |
+| E1 | Scaffold: MV3 manifest with no permissions, in-page panel, manifest file picker, schema version check | done |
 | E2 | Question-text matching: map manifest answers to Console question wording | todo |
 | E3 | Fill and highlight: tick the matching option, green; never submit | todo |
 | E4 | Unmapped panel: questions on screen with no answer, answers with no question on screen | todo |

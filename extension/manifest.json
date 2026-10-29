@@ -1,0 +1,13 @@
+{
+  "manifest_version": 3,
+  "name": "avow",
+  "version": "0.1.0",
+  "description": "Fills Play Console declarations from an avow manifest you pick. Never submits, never connects anywhere.",
+  "content_scripts": [
+    {
+      "matches": ["https://play.google.com/console/*"],
+      "js": ["src/load.js", "src/panel.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}
