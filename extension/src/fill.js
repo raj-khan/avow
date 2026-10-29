@@ -28,6 +28,20 @@
     }) || null;
   };
 
+  // What the panel lists after a fill. notSeen covers questions from a form
+  // that is on screen but whose question is not: the Console splits Data
+  // safety across steps, so these are for the next screen, not errors.
+  avow.summarize = (report) => {
+    const onScreen = new Set(report.filter((r) => r.question).map((r) => r.question));
+    const forms = new Set([...onScreen].map((q) => q.form));
+    return {
+      filled: report.filter((r) => r.status === "filled"),
+      unfilled: report.filter((r) => r.status === "unfilled"),
+      unknown: report.filter((r) => r.status === "unknown"),
+      notSeen: avow.QUESTIONS.filter((q) => forms.has(q.form) && !onScreen.has(q)),
+    };
+  };
+
   // --- DOM ---
 
   const RADIOS = 'input[type="radio"], [role="radio"]';
@@ -68,8 +82,8 @@
   const isChecked = (el) => el.checked === true || el.getAttribute("aria-checked") === "true";
 
   const marked = new Set();
-  function mark(block, color, title) {
-    block.style.outline = `3px solid ${color}`;
+  function mark(block, color, title, style = "solid") {
+    block.style.outline = `3px ${style} ${color}`;
     block.style.outlineOffset = "4px";
     if (title) block.title = `avow: ${title}`;
     marked.add(block);
@@ -91,26 +105,28 @@
     for (const { container, options } of groups()) {
       const found = avow.locate(container, { parent: (n) => n.parentElement, text: (n) => n.textContent });
       if (!found) {
-        report.push({ status: "unknown", block: container, text: container.textContent.trim().slice(0, 120) });
+        const text = container.textContent.replace(/\s+/g, " ").trim().slice(0, 120);
+        mark(container, "#f9ab00", "question not in avow's list; answer it yourself", "dashed");
+        report.push({ status: "unknown", block: container, text });
         continue;
       }
       const { question, block } = found;
       const answer = avow.answerFor(manifest, question);
       if (!answer.label) {
         mark(block, "#f9ab00", answer.reason);
-        report.push({ status: "unfilled", question, reason: answer.reason });
+        report.push({ status: "unfilled", question, block, reason: answer.reason });
         continue;
       }
       const option = avow.pickOption(options, answer.label);
       if (!option) {
         const reason = `no "${answer.label}" option found next to this question`;
         mark(block, "#f9ab00", reason);
-        report.push({ status: "unfilled", question, reason });
+        report.push({ status: "unfilled", question, block, reason });
         continue;
       }
       if (!isChecked(option.node)) option.node.click();
       mark(block, "#1e8e3e", `filled "${answer.label}" from declarations.${question.form}`);
-      report.push({ status: "filled", question, label: answer.label });
+      report.push({ status: "filled", question, block, label: answer.label });
     }
     return report;
   };
