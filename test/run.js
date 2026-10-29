@@ -174,6 +174,15 @@ test("schema fails a wrong type, a bad enum and a missing key", () => {
   assert.deepEqual(missing.detail, ['$: missing required "app"']);
 });
 
+test("schema fails a declaration date that is not YYYY-MM-DD", () => {
+  const r = byId.get("schema").verify({
+    schema: 1,
+    app: { package: "com.example.app" },
+    declarations: { ads: { source: "answered", why: "x", answered_on: "27/10/2026" } },
+  });
+  assert.deepEqual(r.detail, ["$.declarations.ads.answered_on: must be a YYYY-MM-DD date"]);
+});
+
 test("every rule carries a question, a path and a reason", () => {
   for (const r of rules) {
     assert.ok(r.id && r.question && r.console_path, `${r.id} is missing metadata`);
