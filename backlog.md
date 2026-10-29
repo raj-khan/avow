@@ -15,7 +15,7 @@ Status: `todo`, `done`.
 | 3 | `source` enum gains `inherited` and `unanswered`; `completeness` fails on `unanswered`, warns on `planned` and `inherited` | 4 | done |
 | 4 | `--release` flag: `planned` and `inherited` fail instead of warn | 4 | done |
 | 5 | Hand-rolled schema validator, run by `check` as a `schema` rule | 2, 11 Phase 1 | done |
-| 6 | Dates on declarations (`answered_on`, `verified_on`) in schema and `init` | 4 | todo |
+| 6 | Dates on declarations (`answered_on`, `verified_on`) in schema and README | 4 | done |
 | 7 | `FORMS` observation date; `forms` and `check` print its age, warn past 90 days | 7 | todo |
 | 8 | `data-safety` also reads `build.gradle` dependencies, not only `package.json` | 5 | todo |
 | 9 | Library attribution from the manifest-merger report, used by `advertising-id` | 5 | todo |

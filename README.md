@@ -38,6 +38,25 @@ since at release time the manifest has to match what the Console holds.
 do not fail the build: they are for things Play states but does not enforce,
 which should not block a listing Play is willing to accept.
 
+## Declarations
+
+Each entry under `declarations` records one Console form:
+
+```json
+"advertising_id": {
+  "source": "answered",
+  "uses_advertising_id": false,
+  "why": "No ads SDK; AD_ID is absent from the merged release manifest.",
+  "answered_on": "2026-10-27",
+  "answered_by": "raj"
+}
+```
+
+`source` is `answered` (entered in the Console), `planned` (decided, not
+entered), `inherited` (copied from another app, not re-answered), `unanswered`
+or `n/a`. `answered_on` lets `check` notice when the repo changed after the
+answer was given.
+
 ## Rules
 
 | Rule | Checks |
