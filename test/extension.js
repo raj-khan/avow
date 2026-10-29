@@ -217,8 +217,33 @@ test("data types refuse a manifest value Play does not list", () => {
 
 test("extension data types match the CLI's list exactly", () => {
   const avow = load("questions.js");
-  const q = avow.QUESTIONS.find((x) => x.kind === "checkboxes" && x.form === "data_safety");
-  assert.deepEqual([...q.options], DATA_TYPES);
+  assert.deepEqual([...avow.DATA_TYPES], DATA_TYPES);
+});
+
+// Nodes with headings: { headings: [...], parent }.
+const titledTree = (...levels) => levels.reduce((parent, headings) => ({ headings, parent }), null);
+const titledAccess = { parent: (n) => n.parent, headings: (n) => n.headings };
+
+test("dataTypeFor reads the nearest heading that names one data type", () => {
+  const avow = load("questions.js", "fill.js");
+  const page = titledTree(["Data safety", "Crash logs", "Diagnostics"], ["Crash logs", "Is this data collected"], []);
+  assert.equal(avow.dataTypeFor(page, titledAccess), "Crash logs");
+  assert.equal(avow.dataTypeFor(titledTree(["crash LOGS"], []), titledAccess), "Crash logs");
+});
+
+test("dataTypeFor refuses two types at once and help-text mentions", () => {
+  const avow = load("questions.js", "fill.js");
+  assert.equal(avow.dataTypeFor(titledTree(["Crash logs", "Diagnostics"], []), titledAccess), null);
+  assert.equal(avow.dataTypeFor(titledTree(["Your name and photos"], []), titledAccess), null);
+});
+
+test("answerFor reads per-type answers from data_type_details", () => {
+  const avow = load("questions.js");
+  const q = { form: "data_safety", perType: true, answer: (t) => (t.collected ? "Yes" : "No") };
+  const m = { declarations: { data_safety: { source: "answered", data_type_details: { "Crash logs": { collected: true } } } } };
+  assert.equal(avow.answerFor(m, q, { dataType: "Crash logs" }).label, "Yes");
+  assert.match(avow.answerFor(m, q, { dataType: "Photos" }).reason, /no data_type_details entry for "Photos"/);
+  assert.match(avow.answerFor(m, q, {}).reason, /could not tell which data type/);
 });
 
 console.log(`\n${passed} passed${failed ? `, ${failed} failed` : ""}`);

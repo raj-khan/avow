@@ -18,6 +18,20 @@
     return null;
   };
 
+  // Which data type a per-type screen is about: walking up from the
+  // question, the first ancestor whose headings name exactly one data type.
+  // Headings only, and whole-text matches, because "Name" and "Photos" also
+  // turn up inside help text.
+  avow.dataTypeFor = (start, { parent, headings }) => {
+    const labels = new Map(avow.DATA_TYPES.map((t) => [avow.normalize(t), t]));
+    for (let node = start; node; node = parent(node)) {
+      const named = new Set(headings(node).map(avow.normalize).filter((h) => labels.has(h)));
+      if (named.size === 1) return labels.get([...named][0]);
+      if (named.size > 1) return null;
+    }
+    return null;
+  };
+
   // The option whose label is the answer. Labels can carry a description
   // after the answer ("No  Your app does not..."), so the answer must be the
   // whole label or its leading words.
@@ -46,11 +60,13 @@
   avow.summarize = (report) => {
     const onScreen = new Set(report.filter((r) => r.question).map((r) => r.question));
     const forms = new Set([...onScreen].map((q) => q.form));
+    const perTypeShown = [...onScreen].some((q) => q.perType);
     return {
       filled: report.filter((r) => r.status === "filled"),
       unfilled: report.filter((r) => r.status === "unfilled"),
       unknown: report.filter((r) => r.status === "unknown"),
-      notSeen: avow.QUESTIONS.filter((q) => forms.has(q.form) && !onScreen.has(q)),
+      // Per-type questions only count as missing on a per-type screen.
+      notSeen: avow.QUESTIONS.filter((q) => forms.has(q.form) && !onScreen.has(q) && (!q.perType || perTypeShown)),
     };
   };
 
@@ -59,6 +75,18 @@
   const RADIOS = 'input[type="radio"], [role="radio"]';
   const CHECKBOXES = 'input[type="checkbox"], [role="checkbox"]';
   const up = { parent: (n) => n.parentElement, text: (n) => n.textContent };
+  const HEADINGS = 'h1, h2, h3, h4, h5, h6, [role="heading"], legend';
+  const titled = {
+    parent: (n) => n.parentElement,
+    headings: (n) => {
+      const out = [...n.querySelectorAll(HEADINGS)].map((h) => h.textContent);
+      if (n.matches(HEADINGS)) out.push(n.textContent);
+      if (n.matches('[role="dialog"]') && n.getAttribute("aria-label")) out.push(n.getAttribute("aria-label"));
+      return out;
+    },
+  };
+  const contextFor = (question, block) =>
+    question.perType ? { dataType: avow.dataTypeFor(block, titled) } : {};
 
   function labelOf(el) {
     if (el.getAttribute("aria-label")) return el.getAttribute("aria-label");
@@ -125,7 +153,7 @@
     }
     const report = [];
     for (const [block, { question, options }] of blocks) {
-      const answer = avow.answerFor(manifest, question);
+      const answer = avow.answerFor(manifest, question, contextFor(question, block));
       if (!answer.labels) {
         mark(block, "#f9ab00", answer.reason);
         report.push({ status: "unfilled", question, block, reason: answer.reason });
@@ -161,7 +189,7 @@
         continue;
       }
       const { question, block } = found;
-      const answer = avow.answerFor(manifest, question);
+      const answer = avow.answerFor(manifest, question, contextFor(question, block));
       if (!answer.label) {
         mark(block, "#f9ab00", answer.reason);
         report.push({ status: "unfilled", question, block, reason: answer.reason });
