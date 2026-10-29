@@ -7,39 +7,61 @@
   const host = document.createElement("div");
   host.id = "avow-panel-host";
   const root = host.attachShadow({ mode: "closed" });
-  root.innerHTML = `
-    <style>
-      .panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 320px;
-        max-height: 60vh; overflow: auto; font: 13px/1.4 system-ui, sans-serif; color: #202124;
-        background: #fff; border: 1px solid #dadce0; border-radius: 8px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
-      header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #dadce0; }
-      header strong { flex: 1; }
-      .body { padding: 8px 12px; }
-      .collapsed .body { display: none; }
-      button { font: inherit; cursor: pointer; }
-      .warn { color: #b06000; }
-      .error { color: #c5221f; }
-      ul { margin: 4px 0; padding-left: 18px; }
-      h4 { margin: 10px 0 2px; font-size: 12px; text-transform: uppercase; color: #5f6368; }
-      li.jump { cursor: pointer; }
-      li.jump:hover { text-decoration: underline; }
-      small { color: #5f6368; }
-    </style>
-    <div class="panel">
-      <header>
-        <strong>avow</strong>
-        <button id="pick">Pick manifest</button>
-        <button id="fill" disabled>Fill this page</button>
-        <button id="toggle" aria-label="Collapse">–</button>
-      </header>
-      <div class="body">
-        <input id="file" type="file" accept=".json,application/json" hidden>
-        <div id="status">Pick your release-manifest.json. It is read locally and forgotten when you leave the page.</div>
-        <ul id="warnings" class="warn"></ul>
-        <div id="result"></div>
-      </div>
-    </div>`;
+
+  // Built with createElement and textContent only, so no string, from the
+  // manifest or anywhere else, is ever parsed as HTML. The Console's Trusted
+  // Types policy does not cover content scripts, so nothing else would catch it.
+  const el = (tag, props = {}, ...children) => {
+    const node = document.createElement(tag);
+    for (const [k, v] of Object.entries(props)) {
+      if (k === "text") node.textContent = v;
+      else if (k === "class") node.className = v;
+      else if (k in node && typeof v === "boolean") node[k] = v;
+      else node.setAttribute(k, v);
+    }
+    node.append(...children);
+    return node;
+  };
+
+  const style = el("style", { text: `
+    .panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 320px;
+      max-height: 60vh; overflow: auto; font: 13px/1.4 system-ui, sans-serif; color: #202124;
+      background: #fff; border: 1px solid #dadce0; border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
+    header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #dadce0; }
+    header strong { flex: 1; }
+    .body { padding: 8px 12px; }
+    .collapsed .body { display: none; }
+    button { font: inherit; cursor: pointer; }
+    .warn { color: #b06000; }
+    .error { color: #c5221f; }
+    ul { margin: 4px 0; padding-left: 18px; }
+    h4 { margin: 10px 0 2px; font-size: 12px; text-transform: uppercase; color: #5f6368; }
+    li.jump { cursor: pointer; }
+    li.jump:hover { text-decoration: underline; }
+    small { color: #5f6368; }
+  ` });
+
+  root.append(
+    style,
+    el("div", { class: "panel" },
+      el("header", {},
+        el("strong", { text: "avow" }),
+        el("button", { id: "pick", text: "Pick manifest" }),
+        el("button", { id: "fill", text: "Fill this page", disabled: true }),
+        el("button", { id: "toggle", "aria-label": "Collapse", text: "\u2013" }),
+      ),
+      el("div", { class: "body" },
+        el("input", { id: "file", type: "file", accept: ".json,application/json", hidden: true }),
+        el("div", {
+          id: "status",
+          text: "Pick your release-manifest.json. It is read locally and forgotten when you leave the page.",
+        }),
+        el("ul", { id: "warnings", class: "warn" }),
+        el("div", { id: "result" }),
+      ),
+    ),
+  );
 
   const $ = (id) => root.getElementById(id);
   const panel = root.querySelector(".panel");

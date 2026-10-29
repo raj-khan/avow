@@ -64,6 +64,14 @@ test("extension manifest passes Web Store upload checks", () => {
   }
 });
 
+test("extension source never parses strings as HTML or code", () => {
+  const banned = /\b(innerHTML|outerHTML|insertAdjacentHTML|eval|setTimeout\s*\(\s*["'`]|new Function|document\.write|DOMParser|createContextualFragment)\b/;
+  for (const f of readdirSync(SRC)) {
+    const hit = readFileSync(join(SRC, f), "utf8").match(banned);
+    assert.equal(hit, null, `${f} uses ${hit?.[0]}`);
+  }
+});
+
 test("extension source never touches the network, storage or a submit", () => {
   const banned = /\b(fetch|XMLHttpRequest|WebSocket|EventSource|sendBeacon|importScripts|localStorage|sessionStorage|indexedDB|chrome\.storage|chrome\.runtime\.connect)\b|\.submit\(|requestSubmit/;
   for (const f of readdirSync(SRC)) {

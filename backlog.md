@@ -70,7 +70,7 @@ the report.
 | X8 | P0 | Code | `scripts/pack-extension.sh`: allowlist zip (`manifest.json`, `src/`, `icons/`) from inside `extension/` into `dist/`, from a clean git tree | done |
 | X9 | P0 | Code | Add `PRIVACY.md` (no collection, in-memory processing only, Limited Use statement) and link it from the README | done |
 | X10 | P0 | Manual | Fill the Privacy practices tab: single-purpose sentence, "No remote code", no data types, certifications ticked, privacy policy URL | todo |
-| X11 | P1 | Code | Build the panel with `createElement` and a `<style>` set via `textContent`, then ban `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `eval` and `new Function` in the source test | todo |
+| X11 | P1 | Code | Build the panel with `createElement` and a `<style>` set via `textContent`, then ban `innerHTML`, `outerHTML`, `insertAdjacentHTML`, `eval` and `new Function` in the source test | done |
 | X12 | P1 | Code | Cap manifest file size (for example 1 MB) before `file.text()` in `panel.js` | todo |
 | X13 | P1 | Code | `role="status"` on `#status` and `#result`, `role="alert"` on parse errors | todo |
 | X14 | P1 | Code | Replace `li.jump` with `<button>`s that scroll to the question and focus its first control | todo |
