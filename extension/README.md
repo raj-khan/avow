@@ -10,6 +10,20 @@ pick. It does not decide anything: the answers come from the manifest, which
 2. **Load unpacked** and choose this `extension/` folder.
 3. Open a Play Console page such as App content > Ads.
 
+## Test
+
+```sh
+npm test           # extension logic in Node, plus manifest and API guards
+npm run test:e2e   # opt-in: real Chrome, real extension, real Console URL
+```
+
+`test:e2e` needs Chrome 126 or later on the machine (`CHROME=/path/to/chrome`
+to pick one). It loads the unpacked extension into a throwaway headless
+profile over the DevTools pipe, serves `test/fixtures/console-ads.html` at a
+`https://play.google.com/console/...` URL, and checks that the content script
+injects there and that Fill sets the controls. It is not part of `npm test`
+because CI has no Chrome.
+
 ## Package for the Chrome Web Store
 
 ```sh

@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="en">
+<meta charset="utf-8">
+<title>Ads (fixture)</title>
+<body>
+  <!-- A stand-in for the Console's Ads screen: one native radio question and
+       one ARIA radio question, served by test/e2e.js under the real URL. -->
+  <section id="ads">
+    <h2>Does your app contain ads?</h2>
+    <label><input type="radio" name="ads" value="yes"> Yes, my app contains ads</label>
+    <label><input type="radio" name="ads" value="no"> No, my app does not contain ads</label>
+  </section>
+  <section id="adid">
+    <h2>Does your app use advertising ID?</h2>
+    <div role="radiogroup">
+      <div role="radio" tabindex="0" aria-checked="false" aria-label="Yes"
+           onclick="this.parentElement.querySelectorAll('[role=radio]').forEach(r => r.setAttribute('aria-checked', String(r === this)))"></div>
+      <div role="radio" tabindex="0" aria-checked="false" aria-label="No"
+           onclick="this.parentElement.querySelectorAll('[role=radio]').forEach(r => r.setAttribute('aria-checked', String(r === this)))"></div>
+    </div>
+  </section>
+</body>
+</html>
