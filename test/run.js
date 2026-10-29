@@ -149,6 +149,31 @@ test("completeness fails planned and inherited declarations under --release", ()
   assert.equal(r.detail.length, 2);
 });
 
+test("schema passes a well-formed manifest", () => {
+  const r = byId.get("schema").verify({
+    schema: 1,
+    app: { package: "com.example.app" },
+    invariants: { $comment: "comments are allowed at any level" },
+    ...allForms(),
+  });
+  assert.equal(r.status, "pass");
+});
+
+test("schema fails a wrong type, a bad enum and a missing key", () => {
+  const r = byId.get("schema").verify({
+    schema: 1,
+    app: { package: "com.example.app", version_code: "3" },
+    declarations: { ads: { source: "maybe" } },
+  });
+  assert.equal(r.status, "fail");
+  assert.deepEqual(r.detail, [
+    '$.app.version_code: expected integer, got string',
+    '$.declarations.ads.source: must be one of "answered", "planned", "inherited", "unanswered", "n/a"',
+  ]);
+  const missing = byId.get("schema").verify({ schema: 1, declarations: {} });
+  assert.deepEqual(missing.detail, ['$: missing required "app"']);
+});
+
 test("every rule carries a question, a path and a reason", () => {
   for (const r of rules) {
     assert.ok(r.id && r.question && r.console_path, `${r.id} is missing metadata`);
