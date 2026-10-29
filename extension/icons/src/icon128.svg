@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128">
+  <!-- avow icon, 128px. Indigo, not a Google colour; no Play marks. -->
+  <path d="M30,110 L18,122 L50,110 Z" fill="#3B2F8F"/><rect x="16" y="16" width="96" height="96" rx="20" fill="#3B2F8F"/>
+  <path d="M41.9,65.9 L58.2,82.2 L88.0,48.6" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
