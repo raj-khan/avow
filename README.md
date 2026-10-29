@@ -83,6 +83,7 @@ written and does not resolve `extends`.
 | `advertising-id` | the declaration against `AD_ID` in the **merged** manifest |
 | `permissions-inventory` | every merged permission is listed under `permissions`, with the library that added it |
 | `data-safety` | "no collection" against analytics, crash, attribution and ad SDKs in `package.json` and Gradle |
+| `data-types` | Data safety data types are on Play's list, spelled its way, and agree with the collection answer |
 | `content-rating` | each IARC answer has a note, and the issued rating is recorded and dated |
 | `listing-limits` | copy against Play's character caps; emoji, URLs and rankings in the title |
 | `assets` | icon, feature graphic and screenshot dimensions, bytes, aspect ratio and count |

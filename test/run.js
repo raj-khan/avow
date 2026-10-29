@@ -218,6 +218,30 @@ test("content-rating skips until the questionnaire is answered", () => {
   assert.equal(byId.get("content-rating").verify({ declarations: {} }).status, "skip");
 });
 
+const typed = (over) => ({ declarations: { data_safety: { source: "answered", ...over } } });
+
+test("data-types passes Play's labels and an empty list with no collection", () => {
+  const r = byId.get("data-types");
+  assert.equal(r.verify(typed({ collects_user_data: true, data_types: ["Crash logs", "Diagnostics"] })).status, "pass");
+  assert.equal(r.verify(typed({ collects_user_data: false, shares_user_data: false, data_types: [] })).status, "pass");
+});
+
+test("data-types fails unknown or misspelled types and contradictions", () => {
+  const r = byId.get("data-types");
+  assert.deepEqual(r.verify(typed({ collects_user_data: true, data_types: ["crash logs", "Telemetry"] })).detail, [
+    '"crash logs": Play spells it "Crash logs"',
+    '"Telemetry": not a Play data type',
+  ]);
+  assert.deepEqual(r.verify(typed({ collects_user_data: true, data_types: [] })).detail,
+    ["declares collection or sharing, but lists no data types"]);
+  assert.deepEqual(r.verify(typed({ collects_user_data: false, data_types: ["Photos"] })).detail,
+    ["declares no collection or sharing, but lists 1 data type(s)"]);
+});
+
+test("data-types skips without a data_types list", () => {
+  assert.equal(byId.get("data-types").verify(typed({ collects_user_data: false })).status, "skip");
+});
+
 test("listing-limits fails an over-long title", () => {
   const r = byId.get("listing-limits").verify({ listing: { title: "x".repeat(31) } });
   assert.equal(r.status, "fail");

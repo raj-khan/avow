@@ -80,6 +80,7 @@ src/lib/schema.js     the JSON Schema subset the manifest schema uses
 src/lib/manifest.js   loading, with `extends` resolved
 src/lib/git.js        file history and old revisions, via the git binary
 src/lib/diff.js       declaration changes between two manifests
+src/lib/play.js       Play's fixed option lists (data types), shared with the extension by test
 schema/*.json         JSON Schema for the manifest, enforced by the `schema` rule
 test/run.js           fake repos in temp dirs, no real build required
 extension/            MV3 content script: pick a manifest, fill radio and checkbox questions
@@ -121,6 +122,7 @@ rather than trusting the declaration.
 | `advertising-id` | the answer against `AD_ID` in the **merged** manifest, naming the library |
 | `permissions-inventory` | every merged permission is accounted for, with its library |
 | `data-safety` | "no collection" against analytics/crash/attribution/ad SDKs in npm and Gradle |
+| `data-types` | Data safety data types are Play's own labels and agree with the collection answer |
 | `content-rating` | each IARC answer has a reason; the issued rating is recorded and dated |
 | `listing-limits` | copy against Play's character caps; title against the metadata policy |
 | `assets` | icon, feature graphic, screenshot dimensions, bytes, ratio, count |

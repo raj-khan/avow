@@ -30,7 +30,7 @@ change should be checked against it:
 node src/cli.js check /media/raj/Work1/quran-radio --no-color
 ```
 
-Expected today: 6 pass, 3 warn, 1 skip, 0 fail. The three warnings are real
+Expected today: 7 pass, 3 warn, 1 skip, 0 fail. The three warnings are real
 and correct (five declarations carry `answer_notes` rather than a `why`; the
 screenshots are genuinely 1:2.233; content rating records only an expected
 rating, not the one IARC issued, and is undated). The skip is `permissions-inventory`: that

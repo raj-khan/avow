@@ -27,6 +27,7 @@ Status: `todo`, `done`.
 | 15 | `avow diff`: declarations changed since a git revision | 11 Phase 2 | done |
 | 16 | `extends`: a manifest inherits a shared baseline, per-app overrides win | 11 Phase 4 | done |
 | 17 | Docs: ARCHITECTURE.md roadmap and rules table, README, drop "push" from the roadmap | 12 | done |
+| 18 | `data-types` rule: data types spelled as Play lists them, consistent with the collection answer | 5 | done |
 
 ## Chrome extension (v2 section 9)
 
