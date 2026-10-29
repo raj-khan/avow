@@ -82,7 +82,7 @@ the report.
 | X20 | P1 | Manual | Write the listing: name "avow", summary with "for Google Play Console™", trust lines (no permissions, no network, nothing stored, never submits), "Not affiliated with Google", attribution line, category Developer Tools, support URL to GitHub issues | todo |
 | X21 | P1 | Manual | Test-install the packed CRX and record the exact install warning text; record a short demo video | todo |
 | X22 | P2 | Code | Swap green and yellow for a colorblind-safe pair, and add a small visible text tag to each marked block | done |
-| X23 | P2 | Code | Move colors to CSS custom properties with a `prefers-color-scheme: dark` block; in `forced-colors`, replace `box-shadow` with a `CanvasText` border; give the panel its own accent | todo |
+| X23 | P2 | Code | Move colors to CSS custom properties with a `prefers-color-scheme: dark` block; in `forced-colors`, replace `box-shadow` with a `CanvasText` border; give the panel its own accent | done |
 | X24 | P2 | Code | Use `scrollIntoView` with `behavior: "auto"` under `prefers-reduced-motion` | done |
 | X25 | P2 | Code | Empty state as three numbered steps, plus a one-line legend after a fill | todo |
 | X26 | P2 | Code | On Navigation API `currententrychange` (when present), clear marks and results and show "Page changed, fill again"; no persistent observer | todo |

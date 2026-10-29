@@ -23,30 +23,64 @@
     return node;
   };
 
+  // Colours are tokens so dark mode and forced-colors only swap values. The
+  // accent is avow's own indigo, from the icon, so the panel never passes
+  // for part of the Console.
   const style = el("style", { text: `
-    .panel { position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 320px;
-      max-height: 60vh; overflow: auto; font: 13px/1.4 system-ui, sans-serif; color: #202124;
-      background: #fff; border: 1px solid #dadce0; border-radius: 8px;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, .2); }
-    header { display: flex; align-items: center; gap: 8px; padding: 8px 12px; border-bottom: 1px solid #dadce0; }
-    header strong { flex: 1; }
-    .body { padding: 8px 12px; }
+    .panel {
+      --bg: #fff; --fg: #1f1f24; --muted: #5f6368; --line: #dadce0;
+      --accent: #3b2f8f; --on-accent: #fff; --focus: #3b2f8f;
+      --warn: #a04b00; --error: #b3261e;
+      position: fixed; right: 16px; bottom: 16px; z-index: 2147483647; width: 340px;
+      max-height: 60vh; overflow: auto; font: 13px/1.45 system-ui, sans-serif; color: var(--fg);
+      background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, .18); color-scheme: light dark;
+    }
+    @media (prefers-color-scheme: dark) {
+      .panel {
+        --bg: #232329; --fg: #ececf1; --muted: #a8a8b3; --line: #3d3d46;
+        --accent: #a99cf5; --on-accent: #17132e; --focus: #a99cf5;
+        --warn: #f5b26b; --error: #f2b8b5;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, .5);
+      }
+    }
+    /* Windows high contrast drops shadows and repaints colours; a solid
+       border in the system text colour keeps the panel's edge. */
+    @media (forced-colors: active) {
+      .panel { box-shadow: none; border: 2px solid CanvasText; }
+      button { border: 1px solid ButtonText; }
+    }
+    header { display: flex; align-items: center; gap: 6px; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+    header strong { color: var(--accent); letter-spacing: .02em; }
+    #tally { flex: 1; color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .body { padding: 8px 12px 10px; }
     .collapsed .body { display: none; }
     /* Collapsed is a pill: just the name, the tally and the toggle, small
        enough to leave the Console's Save bar clear. */
-    .collapsed { width: auto; }
-    .collapsed header { border-bottom: 0; padding: 4px 8px; }
-    .collapsed #pick, .collapsed #fill, .collapsed #dock { display: none; }
+    .collapsed { width: auto; border-radius: 999px; }
+    .collapsed header { border-bottom: 0; padding: 4px 6px 4px 12px; }
+    .collapsed #dock { display: none; }
+    .actions { display: flex; gap: 8px; margin-bottom: 8px; }
+    .actions button { flex: 1; padding: 6px 8px; }
     .top { top: 16px; bottom: auto; }
-    #tally { color: #5f6368; font-size: 12px; }
-    button { font: inherit; cursor: pointer; }
-    .warn { color: #b06000; }
-    .error { color: #c5221f; }
+    button {
+      font: inherit; font-size: 12px; white-space: nowrap; cursor: pointer; color: var(--fg);
+      background: transparent; border: 1px solid var(--line); border-radius: 6px; padding: 3px 8px;
+    }
+    button:hover:not(:disabled) { border-color: var(--accent); }
+    button:disabled { cursor: default; opacity: .5; }
+    button:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+    #fill { background: var(--accent); color: var(--on-accent); border-color: var(--accent); font-weight: 600; }
+    #dock, #toggle { padding: 3px 7px; }
+    .warn { color: var(--warn); }
+    .error { color: var(--error); }
+    .error:empty, #summary:empty { display: none; }
+    #summary { margin: 8px 0 4px; font-weight: 600; }
     ul { margin: 4px 0; padding-left: 18px; }
-    h4 { margin: 10px 0 2px; font-size: 12px; text-transform: uppercase; color: #5f6368; }
+    h4 { margin: 10px 0 2px; font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); }
     button.jump { all: unset; cursor: pointer; text-decoration: underline; }
-    button.jump:focus-visible { outline: 2px solid #1a73e8; outline-offset: 2px; }
-    small { color: #5f6368; }
+    button.jump:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+    small { color: var(--muted); }
   ` });
 
   root.append(
@@ -55,8 +89,6 @@
       el("header", {},
         el("strong", { text: "avow" }),
         el("span", { id: "tally" }),
-        el("button", { id: "pick", text: "Pick manifest" }),
-        el("button", { id: "fill", text: "Fill this page", disabled: true }),
         el("button", {
           id: "dock", type: "button", "aria-label": "Move avow panel to the top", text: "\u2191",
         }),
@@ -66,6 +98,10 @@
         }),
       ),
       el("div", { class: "body", id: "body" },
+        el("div", { class: "actions" },
+          el("button", { id: "pick", type: "button", text: "Pick manifest" }),
+          el("button", { id: "fill", type: "button", text: "Fill this page", disabled: true }),
+        ),
         el("input", { id: "file", type: "file", accept: ".json,application/json", hidden: true }),
         // Live regions exist from the start and only their text changes, which
         // is what screen readers need to announce an update.
