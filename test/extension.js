@@ -65,6 +65,23 @@ test("extension manifest passes Web Store upload checks", () => {
   }
 });
 
+// No minimum_chrome_version: everything the extension calls unguarded is
+// older than Chrome 88, the first to run Manifest V3, and the two newer APIs
+// are feature-detected with a fallback. Users below a minimum silently stop
+// getting updates, so this test keeps the reason for not setting one true.
+test("APIs newer than Chrome 88 stay feature-detected", () => {
+  const panel = readFileSync(join(SRC, "panel.js"), "utf8");
+  const m = JSON.parse(readFileSync(join(EXT, "manifest.json"), "utf8"));
+  assert.equal(m.minimum_chrome_version, undefined, "minimum_chrome_version set; update this test with the API that needs it");
+  assert.match(panel, /typeof host\.showPopover === "function"/, "Popover API (Chrome 114) must be feature-detected");
+  assert.match(panel, /globalThis\.navigation\?\.addEventListener\?\./, "Navigation API (Chrome 102) must be feature-detected");
+  for (const f of readdirSync(SRC)) {
+    const code = readFileSync(join(SRC, f), "utf8");
+    const newer = code.match(/\b(structuredClone|Object\.hasOwn|findLast|toSorted|toReversed|groupBy)\b|\.at\(|\?\?=|\|\|=|&&=/);
+    assert.equal(newer, null, `${f} uses ${newer?.[0]}, newer than Chrome 88; feature-detect it or set minimum_chrome_version`);
+  }
+});
+
 test("extension source never parses strings as HTML or code", () => {
   const banned = /\b(innerHTML|outerHTML|insertAdjacentHTML|eval|setTimeout\s*\(\s*["'`]|new Function|document\.write|DOMParser|createContextualFragment)\b/;
   for (const f of readdirSync(SRC)) {

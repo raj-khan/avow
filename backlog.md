@@ -93,7 +93,7 @@ the report.
 | X31 | P3 | Manual | Verify a site in Search Console for the verified-publisher link | todo |
 | X32 | P3 | Code | Move to `chrome.sidePanel` (needs `action`, a panel script and messaging) | todo |
 | X33 | P3 | Code | Structure-based matching (control attributes, order within known sections), then `_locales` for avow's own strings | todo |
-| X34 | P3 | Code | Set `minimum_chrome_version` | todo |
+| X34 | P3 | Code | Set `minimum_chrome_version` | done: not needed, guarded by a test |
 
 ## Deliberately not taken from v2
 
