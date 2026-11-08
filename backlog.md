@@ -78,8 +78,8 @@ the report.
 | X16 | P1 | Code | Collapse to a pill after a fill, and add a top-right dock toggle held in memory | done |
 | X17 | P1 | Code | Language guard: if `document.documentElement.lang` is not `en*`, show "English Console only" instead of "no questions found" | done |
 | X18 | P1 | Code | Add `extension/test-manifest.json` (sample) and reviewer test instructions in `extension/README.md` | done |
-| X19 | P1 | Manual | Capture 3 screenshots at 1280x800 from a demo app with account details hidden, and make a 440x280 promo tile with no text | todo |
-| X20 | P1 | Manual | Write the listing: name "avow", summary with "for Google Play Console™", trust lines (one no-warning permission, no network, nothing stored, never submits), "Not affiliated with Google", attribution line, category Developer Tools, support URL to GitHub issues | todo |
+| X19 | P1 | Manual | Capture 3 screenshots at 1280x800 from a demo app with account details hidden, and make a 440x280 promo tile with no text | done: `extension/store/`, from a neutral demo page |
+| X20 | P1 | Manual | Write the listing: name "avow", summary with "for Google Play Console™", trust lines (one no-warning permission, no network, nothing stored, never submits), "Not affiliated with Google", attribution line, category Developer Tools, support URL to GitHub issues | done: `extension/store/LISTING.md` |
 | X21 | P1 | Manual | Test-install the packed CRX and record the exact install warning text; record a short demo video | todo |
 | X22 | P2 | Code | Swap green and yellow for a colorblind-safe pair, and add a small visible text tag to each marked block | done |
 | X23 | P2 | Code | Move colors to CSS custom properties with a `prefers-color-scheme: dark` block; in `forced-colors`, replace `box-shadow` with a `CanvasText` border; give the panel its own accent | done |
