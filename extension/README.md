@@ -34,7 +34,8 @@ npm run pack:extension   # dist/avow-extension-<version>.zip
 
 The zip holds only `manifest.json`, `sidepanel.html`, `src/` and the PNG icons, from the last
 commit; the script refuses to run with uncommitted changes in `extension/`.
-Bump `version` in `manifest.json` for every upload.
+Bump `version` in `manifest.json` for every upload. Listing text, privacy
+answers and images are in [`store/`](store/LISTING.md).
 
 ## Use
 
